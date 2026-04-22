@@ -46,6 +46,6 @@
 4.  **状态同步**: Rust 在处理期间，通过 Tauri Event 机制不断向前端抛出 `progress` 和 `log` 事件，前端响应式更新界面进度条和日志板。
 
 ## 5. 当前开发进度 (Progress)
-- **2026-04-22**: 完成了前后端核心功能的实现。
-  - 前端 (`src/App.vue`): 使用 Vue 3 + Naive UI 搭建了配置表单、文件上传、日志控制台与多进度条界面。
-  - 后端 (`src-tauri/src/lib.rs`): 使用 `calamine` 实现了 Excel 的解析，并利用 `csv` 和 `encoding_rs` 进行文件写入，实现了通过 Tauri API 返回进度和日志消息。
+- **2026-04-22**: 完成了前后端核心功能的实现及 UI 精修排版。
+  - 前端 (`src/App.vue`): 使用 Vue 3 + Naive UI 搭建了配置表单、文件上传、日志控制台与多进度条界面。对 UI 进行了极致的精简与排版优化：将文件列表高度固定、操作按钮图标化并移至列表右上角、配置项区域重构为紧凑的两行布局。
+  - 后端 (`src-tauri/src/lib.rs`): 使用 `calamine` 实现了 Excel 的解析，并利用 `csv` 和 `encoding_rs` 进行文件写入，实现了通过 Tauri API 返回进度和日志消息。同时对跨平台窗口进行了命名 (`Excel To CSV`) 优化。

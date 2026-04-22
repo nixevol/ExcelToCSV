@@ -248,7 +248,7 @@ const currentPercent = computed(() => {
               <n-form-item label="命名规则" style="margin: 0; flex-shrink: 0;">
                 <n-select v-model:value="namingRule" :options="namingOptions" :disabled="isConverting" style="width: 220px" />
               </n-form-item>
-              <n-form-item label="文本编码" style="margin: 0; flex-shrink: 0;">
+              <n-form-item label="文件编码" style="margin: 0; flex-shrink: 0;">
                 <n-select v-model:value="encoding" :options="encodingOptions" :disabled="isConverting" style="width: 100px" />
               </n-form-item>
             </n-form>
