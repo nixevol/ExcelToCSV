@@ -1,7 +1,4 @@
 export default {
-  header: {
-    developer: 'Developer: Nixevol'
-  },
   filter: {
     title: 'Exclusion Rules',
     modalTitle: 'Sheet Exclusion Rules',

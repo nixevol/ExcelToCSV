@@ -1,7 +1,4 @@
 export default {
-  header: {
-    developer: 'Developer: Nixevol'
-  },
   filter: {
     title: '设置排除关键字',
     modalTitle: 'Sheet 排除规则设置',
