@@ -30,8 +30,15 @@ const savedLocale = localStorage.getItem('app-locale');
 if (savedLocale) locale.value = savedLocale;
 
 const languageOptions = [
-  { label: '中文', key: 'zh' },
-  { label: 'English', key: 'en' }
+  { label: '简体中文', key: 'zh' },
+  { label: '繁體中文', key: 'zh-TW' },
+  { label: 'English', key: 'en' },
+  { label: '日本語', key: 'ja' },
+  { label: '한국어', key: 'ko' },
+  { label: 'Русский', key: 'ru' },
+  { label: 'Français', key: 'fr' },
+  { label: 'Español', key: 'es' },
+  { label: 'Deutsch', key: 'de' }
 ];
 
 const handleLocaleSelect = (key: string) => {
