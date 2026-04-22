@@ -5,6 +5,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
+import { useI18n } from "vue-i18n";
 import {
   NConfigProvider, NGlobalStyle, darkTheme,
   NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog,
@@ -13,11 +14,17 @@ import {
   NDataTable, NModal, NIcon, NTooltip
 } from "naive-ui";
 
+const { t, locale } = useI18n();
+
 const osTheme = useOsTheme();
 const theme = ref(osTheme.value === 'dark' ? darkTheme : null);
 
 const toggleTheme = () => {
   theme.value = theme.value?.name === 'dark' ? null : darkTheme;
+};
+
+const toggleLocale = () => {
+  locale.value = locale.value === 'zh' ? 'en' : 'zh';
 };
 
 const showAboutModal = ref(false);
@@ -49,11 +56,11 @@ const totalProgress = ref({ current: 0, total: 0 });
 const currentFileProgress = ref({ current: 0, total: 0, filename: "" });
 
 // Options
-const namingOptions = [
-  { label: "Excel名-Sheet名_时间戳.csv", value: "excel-sheet-time" },
-  { label: "Sheet名_时间戳.csv", value: "sheet-time" },
-  { label: "Excel名-Sheet名.csv", value: "excel-sheet" }
-];
+const namingOptions = computed(() => [
+  { label: t('naming.excelSheetTime'), value: "excel-sheet-time" },
+  { label: t('naming.sheetTime'), value: "sheet-time" },
+  { label: t('naming.excelSheet'), value: "excel-sheet" }
+]);
 
 const encodingOptions = [
   { label: "GBK", value: "GBK" },
@@ -124,13 +131,13 @@ const formatSize = (bytes: number) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const columns = [
-  { title: '文件名', key: 'name', minWidth: 150, ellipsis: { tooltip: true } },
-  { title: '类型', key: 'extension', width: 80 },
-  { title: '大小', key: 'size_bytes', width: 100, render: (row: FileInfo) => formatSize(row.size_bytes) },
-  { title: '路径', key: 'path', minWidth: 200, ellipsis: { tooltip: true } },
+const columns = computed(() => [
+  { title: t('table.fileName'), key: 'name', minWidth: 150, ellipsis: { tooltip: true } },
+  { title: t('table.type'), key: 'extension', width: 80 },
+  { title: t('table.size'), key: 'size_bytes', width: 100, render: (row: FileInfo) => formatSize(row.size_bytes) },
+  { title: t('table.path'), key: 'path', minWidth: 200, ellipsis: { tooltip: true } },
   { 
-    title: '操作', 
+    title: t('table.actions'), 
     key: 'actions', 
     width: 80, 
     render: (row: FileInfo) => h(NButton, { 
@@ -138,9 +145,9 @@ const columns = [
       type: 'error', 
       disabled: isConverting.value,
       onClick: () => removeFile(row.path) 
-    }, { default: () => '删除' })
+    }, { default: () => t('table.delete') })
   }
-];
+]);
 
 const removeFile = (path: string) => {
   selectedFiles.value = selectedFiles.value.filter(f => f.path !== path);
@@ -175,7 +182,6 @@ const selectOutputDir = async () => {
   }
 };
 
-
 const clearOutputDir = () => {
   outputDir.value = null;
 };
@@ -203,7 +209,7 @@ const startConversion = async () => {
       }
     });
   } catch (error) {
-    logs.value += `❌ 致命错误: ${error}\n`;
+    logs.value += `❌ ${t('status.fatalError')}: ${error}\n`;
   } finally {
     isConverting.value = false;
     isStopping.value = false;
@@ -243,9 +249,16 @@ const currentPercent = computed(() => {
               </n-icon>
             </template>
           </n-button>
-          <span>Developer: Nixevol</span>
+          <n-button circle size="tiny" text @click="toggleLocale">
+            <template #icon>
+              <n-icon>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51l.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5l3.11 3.11l.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>
+              </n-icon>
+            </template>
+          </n-button>
         </div>
         <div style="display: flex; align-items: center; gap: 4px;">
+          <span>{{ t('header.developer') }}</span>
           <span>V1.0.1</span>
           <n-button circle size="tiny" text @click="showAboutModal = true">
             <template #icon>
@@ -263,7 +276,7 @@ const currentPercent = computed(() => {
         <!-- File List Header (Top) -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
           <n-button type="warning" ghost size="small" @click="showFilterModal = true" :disabled="isConverting">
-            设置排除关键字
+            {{ t('filter.title') }}
           </n-button>
 
           <n-space :size="8">
@@ -277,7 +290,7 @@ const currentPercent = computed(() => {
                   </template>
                 </n-button>
               </template>
-              导入 Excel 文件
+              {{ t('tooltip.importFiles') }}
             </n-tooltip>
             
             <n-tooltip trigger="hover">
@@ -290,7 +303,7 @@ const currentPercent = computed(() => {
                   </template>
                 </n-button>
               </template>
-              清空列表
+              {{ t('tooltip.clearList') }}
             </n-tooltip>
           </n-space>
         </div>
@@ -309,7 +322,7 @@ const currentPercent = computed(() => {
           >
             <template #empty>
               <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 0; color: var(--n-text-color-3);">
-                <span style="font-size: 13px;">请拖入需转换文件 / 点击右上角 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" style="vertical-align: middle; color: #18a058;"><circle cx="12" cy="12" r="11" fill="currentColor"/><path fill="white" d="M11 11V7h2v4h4v2h-4v4h-2v-4H7v-2z"/></svg> 添加文件</span>
+                <span style="font-size: 13px;" v-html="t('table.emptyHint', { icon: '&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;16&quot; height=&quot;16&quot; style=&quot;vertical-align: middle; color: #18a058;&quot;&gt;&lt;circle cx=&quot;12&quot; cy=&quot;12&quot; r=&quot;11&quot; fill=&quot;currentColor&quot;/&gt;&lt;path fill=&quot;white&quot; d=&quot;M11 11V7h2v4h4v2h-4v4h-2v-4H7v-2z&quot;/&gt;&lt;/svg&gt;' })"></span>
               </div>
             </template>
           </n-data-table>
@@ -320,19 +333,19 @@ const currentPercent = computed(() => {
           <!-- Left side configs -->
           <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
             <n-form inline label-placement="left" size="small" :show-feedback="false" style="display: flex; gap: 16px;">
-              <n-form-item label="命名规则" style="margin: 0; flex-shrink: 0;">
+              <n-form-item :label="t('config.namingRule')" style="margin: 0; flex-shrink: 0;">
                 <n-select v-model:value="namingRule" :options="namingOptions" :disabled="isConverting" style="width: 220px" />
               </n-form-item>
-              <n-form-item label="文件编码" style="margin: 0; flex-shrink: 0;">
+              <n-form-item :label="t('config.encoding')" style="margin: 0; flex-shrink: 0;">
                 <n-select v-model:value="encoding" :options="encodingOptions" :disabled="isConverting" style="width: 100px" />
               </n-form-item>
             </n-form>
             
             <n-form inline label-placement="left" size="small" :show-feedback="false" style="display: flex;">
-              <n-form-item label="输出目录" style="margin: 0; flex: 1; min-width: 0;">
+              <n-form-item :label="t('config.outputDir')" style="margin: 0; flex: 1; min-width: 0;">
                 <div style="display: flex; gap: 8px; width: 100%;">
-                  <n-input v-model:value="outputDir" readonly placeholder="默认保存至原目录" style="flex: 1;" clearable @clear="clearOutputDir" />
-                  <n-button @click="selectOutputDir" :disabled="isConverting">选择</n-button>
+                  <n-input v-model:value="outputDir" readonly :placeholder="t('config.outputPlaceholder')" style="flex: 1;" clearable @clear="clearOutputDir" />
+                  <n-button @click="selectOutputDir" :disabled="isConverting">{{ t('config.select') }}</n-button>
                 </div>
               </n-form-item>
             </n-form>
@@ -346,19 +359,19 @@ const currentPercent = computed(() => {
             :disabled="selectedFiles.length === 0"
             style="flex-shrink: 0; height: auto;"
           >
-            {{ isConverting ? '停止转换' : '开始转换' }}
+            {{ isConverting ? t('button.stop') : t('button.start') }}
           </n-button>
         </div>
       </n-card>
 
       <!-- Bottom Section: Progress and Logs -->
-      <n-card class="bottom-card" title="任务状态" size="small">
+      <n-card class="bottom-card" :title="t('status.title')" size="small">
         <div class="progress-section">
           <!-- Total Progress -->
           <div style="margin-bottom: 12px;">
             <n-space justify="space-between" style="margin-bottom: 4px;">
-              <n-text strong>总进度</n-text>
-              <n-text depth="3">{{ totalProgress.current }} / {{ totalProgress.total }} 文件</n-text>
+              <n-text strong>{{ t('status.totalProgress') }}</n-text>
+              <n-text depth="3">{{ totalProgress.current }} / {{ totalProgress.total }} {{ t('status.files') }}</n-text>
             </n-space>
             <n-progress 
               type="line" 
@@ -371,7 +384,7 @@ const currentPercent = computed(() => {
           <!-- Current File Progress -->
           <div>
             <n-space justify="space-between" style="margin-bottom: 4px;">
-              <n-text strong>当前处理：<n-text type="primary">{{ currentFileProgress.filename || '等待中...' }}</n-text></n-text>
+              <n-text strong>{{ t('status.currentProcessing') }}<n-text type="primary">{{ currentFileProgress.filename || t('status.waiting') }}</n-text></n-text>
               <n-text depth="3">{{ currentFileProgress.current }} / {{ currentFileProgress.total }} Sheet</n-text>
             </n-space>
             <n-progress 
@@ -391,32 +404,32 @@ const currentPercent = computed(() => {
 
 
       <!-- About Modal -->
-      <n-modal v-model:show="showAboutModal" preset="card" title="关于" style="width: 400px">
+      <n-modal v-model:show="showAboutModal" preset="card" :title="t('about.title')" style="width: 400px">
         <n-space vertical align="center" style="text-align: center; padding: 20px 0;">
           <h2 style="margin: 0;">Excel To CSV</h2>
           <n-text depth="3">V1.0.1</n-text>
-          <n-text style="margin-top: 10px;">批量 Excel 转 CSV 工具</n-text>
+          <n-text style="margin-top: 10px;">{{ t('about.description') }}</n-text>
           <n-button type="primary" style="margin-top: 20px;" @click="openGithub">
             <template #icon>
               <n-icon>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33c.85 0 1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"></path></svg>
               </n-icon>
             </template>
-            访问 GitHub 主页
+            {{ t('about.github') }}
           </n-button>
         </n-space>
       </n-modal>
 
       <!-- Filter Modal -->
-      <n-modal v-model:show="showFilterModal" preset="card" title="Sheet 排除规则设置" style="width: 500px">
+      <n-modal v-model:show="showFilterModal" preset="card" :title="t('filter.modalTitle')" style="width: 500px">
         <n-space vertical>
-          <n-text depth="3">当 Sheet 名称包含以下任意关键字时，将跳过不转换。输入关键字后按回车添加。</n-text>
-          <n-dynamic-tags v-model:value="sheetFilters" :disabled="isConverting" placeholder="例如: 汇总" />
+          <n-text depth="3">{{ t('filter.description') }}</n-text>
+          <n-dynamic-tags v-model:value="sheetFilters" :disabled="isConverting" :placeholder="t('filter.placeholder')" />
         </n-space>
         <template #footer>
           <n-space justify="space-between">
-            <n-button type="error" ghost @click="sheetFilters = []" :disabled="isConverting || sheetFilters.length === 0">清空全部</n-button>
-            <n-button type="primary" @click="showFilterModal = false">完成</n-button>
+            <n-button type="error" ghost @click="sheetFilters = []" :disabled="isConverting || sheetFilters.length === 0">{{ t('filter.clearAll') }}</n-button>
+            <n-button type="primary" @click="showFilterModal = false">{{ t('filter.done') }}</n-button>
           </n-space>
         </template>
       </n-modal>
@@ -428,7 +441,7 @@ const currentPercent = computed(() => {
 html, body, #app {
   height: 100%;
   margin: 0;
-  overflow: hidden; /* prevent whole page scroll */
+  overflow: hidden;
 }
 
 body {
@@ -476,7 +489,7 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1 1 0;
-  overflow: hidden; /* Prevents card content from breaking the flex layout */
+  overflow: hidden;
   padding-bottom: 12px;
 }
 
