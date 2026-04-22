@@ -93,34 +93,34 @@ fn cancel_conversion(cancel_flag: State<'_, CancelFlag>) {
 async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag: State<'_, CancelFlag>) -> Result<(), String> {
     cancel_flag.0.store(false, Ordering::SeqCst);
     let total_files = config.files.len();
-    emit_log(&app, "info", &format!("========== 开始处理，共 {} 个文件 ==========", total_files));
+    emit_log(&app, "info", &format!("========== Start processing, total {} file(s) ==========", total_files));
 
     for (file_idx, file_path_str) in config.files.iter().enumerate() {
         if cancel_flag.0.load(Ordering::SeqCst) {
-            emit_log(&app, "warn", "转换被用户手动取消！");
+            emit_log(&app, "warn", "Conversion manually cancelled by user!");
             break;
         }
 
         let file_path = Path::new(file_path_str);
         let file_name = file_path.file_stem().unwrap_or_default().to_string_lossy().to_string();
         
-        emit_log(&app, "info", &format!("\n---> 开始读取文件 [{}/{}] : {}", file_idx + 1, total_files, file_name));
+        emit_log(&app, "info", &format!("\n---> Reading file [{}/{}] : {}", file_idx + 1, total_files, file_name));
         
         let mut workbook = match open_workbook_auto(file_path) {
             Ok(wb) => wb,
             Err(e) => {
-                emit_log(&app, "error", &format!("无法打开文件 {}: {}", file_name, e));
+                emit_log(&app, "error", &format!("Cannot open file {}: {}", file_name, e));
                 continue;
             }
         };
 
         let sheets = workbook.sheet_names().to_owned();
         let total_sheets = sheets.len();
-        emit_log(&app, "info", &format!("成功读取到 {} 个 Sheet", total_sheets));
+        emit_log(&app, "info", &format!("Successfully read {} Sheet(s)", total_sheets));
         
         for (sheet_idx, sheet_name) in sheets.iter().enumerate() {
             if cancel_flag.0.load(Ordering::SeqCst) {
-                emit_log(&app, "warn", "转换被用户手动取消！");
+                emit_log(&app, "warn", "Conversion manually cancelled by user!");
                 break;
             }
 
@@ -135,18 +135,18 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag
                 }
             }
             if skip {
-                emit_log(&app, "warn", &format!("跳过 Sheet [{}/{}] : {} (匹配关键字排除规则)", sheet_idx + 1, total_sheets, sheet_name));
+                emit_log(&app, "warn", &format!("Skip Sheet [{}/{}] : {} (Matches exclusion rule)", sheet_idx + 1, total_sheets, sheet_name));
                 emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "skipped");
                 continue;
             }
 
-            emit_log(&app, "info", &format!("正在转换 Sheet [{}/{}] : {}", sheet_idx + 1, total_sheets, sheet_name));
+            emit_log(&app, "info", &format!("Converting Sheet [{}/{}] : {}", sheet_idx + 1, total_sheets, sheet_name));
             emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "converting");
 
             let range = match workbook.worksheet_range(sheet_name) {
                 Ok(r) => r,
                 Err(e) => {
-                    emit_log(&app, "error", &format!("读取失败 {}: {}", sheet_name, e));
+                    emit_log(&app, "error", &format!("Failed to read {}: {}", sheet_name, e));
                     continue;
                 }
             };
@@ -171,7 +171,7 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag
             let file = match File::create(&out_file_path) {
                 Ok(f) => f,
                 Err(e) => {
-                    emit_log(&app, "error", &format!("创建输出文件失败: {}", e));
+                    emit_log(&app, "error", &format!("Failed to create output file: {}", e));
                     continue;
                 }
             };
@@ -206,12 +206,12 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag
                 let _ = final_file.write_all(&csv_bytes);
             }
 
-            emit_log(&app, "info", &format!("  -> 成功保存: {}", out_file_path.file_name().unwrap().to_string_lossy()));
+            emit_log(&app, "info", &format!("  -> Successfully saved: {}", out_file_path.file_name().unwrap().to_string_lossy()));
             emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "done");
         }
     }
 
-    emit_log(&app, "info", "========== ✅ 所有任务处理完成！ ==========");
+    emit_log(&app, "info", "========== ✅ All tasks completed! ==========");
     Ok(())
 }
 
