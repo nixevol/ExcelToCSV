@@ -100,7 +100,8 @@ onMounted(async () => {
   unlistenLog = await listen("convert-log", (event: any) => {
     const payload = event.payload;
     const prefix = payload.level === "error" ? "❌ " : payload.level === "warn" ? "⚠️ " : "ℹ️ ";
-    logs.value += `${prefix}${payload.message}\n`;
+    const translatedMsg = t(`log.${payload.code}`, payload.args || {});
+    logs.value += `${prefix}${translatedMsg}\n`;
   });
 
   unlistenProgress = await listen("convert-progress", (event: any) => {

@@ -2,6 +2,7 @@ use calamine::{open_workbook_auto, Reader, Data};
 use csv::WriterBuilder;
 use encoding_rs::GBK;
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -44,7 +45,8 @@ struct ProgressPayload {
 #[derive(Clone, Serialize)]
 struct LogPayload {
     level: String, // "info", "warn", "error"
-    message: String,
+    code: String,
+    args: Value,
 }
 
 #[derive(Deserialize)]
@@ -56,10 +58,11 @@ struct ConvertConfig {
     sheet_filters: Vec<String>,
 }
 
-fn emit_log(app: &AppHandle, level: &str, message: &str) {
+fn emit_log(app: &AppHandle, level: &str, code: &str, args: Value) {
     let _ = app.emit("convert-log", LogPayload {
         level: level.to_string(),
-        message: message.to_string(),
+        code: code.to_string(),
+        args,
     });
 }
 
@@ -93,34 +96,34 @@ fn cancel_conversion(cancel_flag: State<'_, CancelFlag>) {
 async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag: State<'_, CancelFlag>) -> Result<(), String> {
     cancel_flag.0.store(false, Ordering::SeqCst);
     let total_files = config.files.len();
-    emit_log(&app, "info", &format!("========== Start processing, total {} file(s) ==========", total_files));
+    emit_log(&app, "info", "START_PROCESSING", json!({ "total": total_files }));
 
     for (file_idx, file_path_str) in config.files.iter().enumerate() {
         if cancel_flag.0.load(Ordering::SeqCst) {
-            emit_log(&app, "warn", "Conversion manually cancelled by user!");
+            emit_log(&app, "warn", "CONVERSION_CANCELLED", json!({}));
             break;
         }
 
         let file_path = Path::new(file_path_str);
         let file_name = file_path.file_stem().unwrap_or_default().to_string_lossy().to_string();
         
-        emit_log(&app, "info", &format!("\n---> Reading file [{}/{}] : {}", file_idx + 1, total_files, file_name));
+        emit_log(&app, "info", "READING_FILE", json!({ "current": file_idx + 1, "total": total_files, "file": file_name }));
         
         let mut workbook = match open_workbook_auto(file_path) {
             Ok(wb) => wb,
             Err(e) => {
-                emit_log(&app, "error", &format!("Cannot open file {}: {}", file_name, e));
+                emit_log(&app, "error", "OPEN_FILE_FAILED", json!({ "file": file_name, "error": e.to_string() }));
                 continue;
             }
         };
 
         let sheets = workbook.sheet_names().to_owned();
         let total_sheets = sheets.len();
-        emit_log(&app, "info", &format!("Successfully read {} Sheet(s)", total_sheets));
+        emit_log(&app, "info", "READ_SHEETS_SUCCESS", json!({ "count": total_sheets }));
         
         for (sheet_idx, sheet_name) in sheets.iter().enumerate() {
             if cancel_flag.0.load(Ordering::SeqCst) {
-                emit_log(&app, "warn", "Conversion manually cancelled by user!");
+                emit_log(&app, "warn", "CONVERSION_CANCELLED", json!({}));
                 break;
             }
 
@@ -135,18 +138,18 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag
                 }
             }
             if skip {
-                emit_log(&app, "warn", &format!("Skip Sheet [{}/{}] : {} (Matches exclusion rule)", sheet_idx + 1, total_sheets, sheet_name));
+                emit_log(&app, "warn", "SKIP_SHEET", json!({ "current": sheet_idx + 1, "total": total_sheets, "sheet": sheet_name }));
                 emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "skipped");
                 continue;
             }
 
-            emit_log(&app, "info", &format!("Converting Sheet [{}/{}] : {}", sheet_idx + 1, total_sheets, sheet_name));
+            emit_log(&app, "info", "CONVERTING_SHEET", json!({ "current": sheet_idx + 1, "total": total_sheets, "sheet": sheet_name }));
             emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "converting");
 
             let range = match workbook.worksheet_range(sheet_name) {
                 Ok(r) => r,
                 Err(e) => {
-                    emit_log(&app, "error", &format!("Failed to read {}: {}", sheet_name, e));
+                    emit_log(&app, "error", "READ_SHEET_FAILED", json!({ "sheet": sheet_name, "error": e.to_string() }));
                     continue;
                 }
             };
@@ -171,7 +174,7 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag
             let file = match File::create(&out_file_path) {
                 Ok(f) => f,
                 Err(e) => {
-                    emit_log(&app, "error", &format!("Failed to create output file: {}", e));
+                    emit_log(&app, "error", "CREATE_OUTPUT_FAILED", json!({ "error": e.to_string() }));
                     continue;
                 }
             };
@@ -206,12 +209,12 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag
                 let _ = final_file.write_all(&csv_bytes);
             }
 
-            emit_log(&app, "info", &format!("  -> Successfully saved: {}", out_file_path.file_name().unwrap().to_string_lossy()));
+            emit_log(&app, "info", "SAVE_SUCCESS", json!({ "file": out_file_path.file_name().unwrap().to_string_lossy() }));
             emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "done");
         }
     }
 
-    emit_log(&app, "info", "========== ✅ All tasks completed! ==========");
+    emit_log(&app, "info", "ALL_TASKS_COMPLETED", json!({}));
     Ok(())
 }
 

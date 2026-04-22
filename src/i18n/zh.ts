@@ -53,5 +53,18 @@ export default {
     description: 'Excel 转 CSV 桌面工具',
     developer: '开发者：Nixevol',
     github: '访问 GitHub 主页'
+  },
+  log: {
+    START_PROCESSING: '========== 开始处理，共 {total} 个文件 ==========',
+    CONVERSION_CANCELLED: '转换被用户手动取消！',
+    READING_FILE: '\n---> 开始读取文件 [{current}/{total}] : {file}',
+    OPEN_FILE_FAILED: '无法打开文件 {file}: {error}',
+    READ_SHEETS_SUCCESS: '成功读取到 {count} 个 Sheet',
+    SKIP_SHEET: '跳过 Sheet [{current}/{total}] : {sheet} (匹配关键字排除规则)',
+    CONVERTING_SHEET: '正在转换 Sheet [{current}/{total}] : {sheet}',
+    READ_SHEET_FAILED: '读取失败 {sheet}: {error}',
+    CREATE_OUTPUT_FAILED: '创建输出文件失败: {error}',
+    SAVE_SUCCESS: '  -> 成功保存: {file}',
+    ALL_TASKS_COMPLETED: '========== ✅ 所有任务处理完成！ =========='
   }
 }

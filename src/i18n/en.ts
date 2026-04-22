@@ -53,5 +53,18 @@ export default {
     description: 'Excel to CSV Desktop Tool',
     developer: 'Developer: Nixevol',
     github: 'Visit GitHub'
+  },
+  log: {
+    START_PROCESSING: '========== Start processing, total {total} file(s) ==========',
+    CONVERSION_CANCELLED: 'Conversion manually cancelled by user!',
+    READING_FILE: '\n---> Reading file [{current}/{total}] : {file}',
+    OPEN_FILE_FAILED: 'Cannot open file {file}: {error}',
+    READ_SHEETS_SUCCESS: 'Successfully read {count} Sheet(s)',
+    SKIP_SHEET: 'Skip Sheet [{current}/{total}] : {sheet} (Matches exclusion rule)',
+    CONVERTING_SHEET: 'Converting Sheet [{current}/{total}] : {sheet}',
+    READ_SHEET_FAILED: 'Failed to read {sheet}: {error}',
+    CREATE_OUTPUT_FAILED: 'Failed to create output file: {error}',
+    SAVE_SUCCESS: '  -> Successfully saved: {file}',
+    ALL_TASKS_COMPLETED: '========== ✅ All tasks completed! =========='
   }
 }
