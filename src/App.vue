@@ -10,7 +10,7 @@ import {
   NConfigProvider, NGlobalStyle, darkTheme,
   NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog,
   NProgress, NText, useOsTheme,
-  NForm, NFormItem,
+  NForm, NFormItem, NScrollbar,
   NDataTable, NModal, NIcon, NTooltip, NDropdown
 } from "naive-ui";
 
@@ -318,7 +318,7 @@ const currentPercent = computed(() => {
         </div>
 
         <!-- File Data Table (Middle) -->
-        <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 180px;">
+        <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 220px;">
           <n-data-table
             :columns="columns"
             :data="selectedFiles"
@@ -415,7 +415,9 @@ const currentPercent = computed(() => {
 
         <!-- Logs -->
         <div class="log-container">
-           <n-log :log="logs" />
+          <n-scrollbar>
+            <n-log :log="logs" />
+          </n-scrollbar>
         </div>
       </n-card>
 
@@ -495,7 +497,6 @@ body {
 
 .bottom-card {
   flex: 1 1 0;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -507,7 +508,6 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1 1 0;
-  min-height: 0;
   overflow: hidden;
   padding-bottom: 12px;
 }
@@ -519,16 +519,21 @@ body {
 
 .log-container {
   flex: 1 1 0;
-  min-height: 80px;
+  height: 120px;
   box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
   background-color: var(--n-color-modal);
-  overflow-y: auto;
-  padding: 8px;
+  overflow: hidden;
+}
+
+.log-container :deep(.n-scrollbar) {
+  height: 100%;
 }
 
 .log-container :deep(.n-log) {
-  margin: 0;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow: hidden !important;
 }
 </style>
