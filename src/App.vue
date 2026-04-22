@@ -10,7 +10,7 @@ import {
   NConfigProvider, NGlobalStyle, darkTheme,
   NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog,
   NProgress, NText, useOsTheme,
-  NForm, NFormItem, NScrollbar,
+  NForm, NFormItem,
   NDataTable, NModal, NIcon, NTooltip, NDropdown
 } from "naive-ui";
 
@@ -55,12 +55,12 @@ const showFilterModal = ref(false);
 const isConverting = ref(false);
 const isStopping = ref(false);
 const logs = ref<string>("");
-const logInstRef = ref<any>(null);
+const logContainerRef = ref<HTMLElement | null>(null);
 
 watch(logs, () => {
   nextTick(() => {
-    if (logInstRef.value) {
-      logInstRef.value.scrollTo({ position: 'bottom', silent: true });
+    if (logContainerRef.value) {
+      logContainerRef.value.scrollTop = logContainerRef.value.scrollHeight;
     }
   });
 });
@@ -395,7 +395,7 @@ const currentPercent = computed(() => {
             <n-progress 
               type="line" 
               :percentage="totalPercent" 
-              :status="isConverting ? 'info' : (totalProgress.total > 0 && totalProgress.current === totalProgress.total ? 'success' : 'default')"
+              :status="totalProgress.total > 0 && totalProgress.current === totalProgress.total ? 'success' : 'default'"
               :processing="isConverting"
               :show-indicator="totalProgress.total > 0"
             />
@@ -424,8 +424,8 @@ const currentPercent = computed(() => {
         </div>
 
         <!-- Logs -->
-        <div class="log-container">
-           <n-log :log="logs" ref="logInstRef" />
+        <div class="log-container" ref="logContainerRef">
+           <n-log :log="logs" />
         </div>
       </n-card>
 
@@ -481,7 +481,7 @@ body {
 }
 
 .app-layout {
-  /* height: 100vh; */
+  height: 100vh;
   display: flex;
   flex-direction: column;
   padding: 12px;
@@ -532,12 +532,26 @@ body {
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
   background-color: var(--n-color-modal);
-  overflow: hidden;
+  overflow-y: auto;
+}
+
+.log-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.log-container::-webkit-scrollbar-thumb {
+  background-color: rgba(144, 147, 153, 0.3);
+  border-radius: 4px;
+}
+.log-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(144, 147, 153, 0.5);
+}
+.log-container::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .log-container :deep(.n-log) {
   padding: 8px;
   box-sizing: border-box;
-  height: 100%;
 }
 </style>
