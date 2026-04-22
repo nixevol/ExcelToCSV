@@ -65,13 +65,13 @@ fn emit_progress(
 #[tauri::command]
 async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig) -> Result<(), String> {
     let total_files = config.files.len();
-    emit_log(&app, "info", &format!("========== 开始处理，�?{} 个文�?==========", total_files));
+    emit_log(&app, "info", &format!("========== 开始处理，共 {} 个文件 ==========", total_files));
 
     for (file_idx, file_path_str) in config.files.iter().enumerate() {
         let file_path = Path::new(file_path_str);
         let file_name = file_path.file_stem().unwrap_or_default().to_string_lossy().to_string();
         
-        emit_log(&app, "info", &format!("\n---> 开始读取文�?[{}/{}] : {}", file_idx + 1, total_files, file_name));
+        emit_log(&app, "info", &format!("\n---> 开始读取文件 [{}/{}] : {}", file_idx + 1, total_files, file_name));
         
         let mut workbook = match open_workbook_auto(file_path) {
             Ok(wb) => wb,
@@ -83,7 +83,7 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig) -> Result<(
 
         let sheets = workbook.sheet_names().to_owned();
         let total_sheets = sheets.len();
-        emit_log(&app, "info", &format!("成功读取�?{} �?Sheet", total_sheets));
+        emit_log(&app, "info", &format!("成功读取到 {} 个 Sheet", total_sheets));
         
         for (sheet_idx, sheet_name) in sheets.iter().enumerate() {
             emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "parsing");
@@ -97,7 +97,7 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig) -> Result<(
                 }
             }
             if skip {
-                emit_log(&app, "warn", &format!("跳过 Sheet [{}/{}] : {} (匹配关键字排除规�?", sheet_idx + 1, total_sheets, sheet_name));
+                emit_log(&app, "warn", &format!("跳过 Sheet [{}/{}] : {} (匹配关键字排除规则)", sheet_idx + 1, total_sheets, sheet_name));
                 emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "skipped");
                 continue;
             }
@@ -170,7 +170,7 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig) -> Result<(
         }
     }
 
-    emit_log(&app, "info", "========== �?所有任务处理完成！ ==========");
+    emit_log(&app, "info", "========== ✅ 所有任务处理完成！ ==========");
     Ok(())
 }
 
