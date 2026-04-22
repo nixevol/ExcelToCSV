@@ -186,8 +186,8 @@ const currentPercent = computed(() => {
 <template>
   <n-config-provider :theme="theme" class="app-provider">
     <n-global-style />
-    <n-layout class="app-layout">
-      
+    <n-layout style="height: 100vh;" :native-scrollbar="false">
+      <div class="app-layout">
       <!-- Top Section: Config and File List -->
       <n-card class="top-card" size="small">
         
@@ -327,7 +327,7 @@ const currentPercent = computed(() => {
           </n-space>
         </template>
       </n-modal>
-
+      </div>
     </n-layout>
   </n-config-provider>
 </template>
@@ -349,7 +349,7 @@ body {
 }
 
 .app-layout {
-  height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   padding: 12px;
@@ -371,7 +371,7 @@ body {
 }
 
 .bottom-card {
-  flex: 0 0 auto;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -382,6 +382,7 @@ body {
 .bottom-card > .n-card__content {
   display: flex;
   flex-direction: column;
+  flex: 1 1 0;
   overflow: hidden; /* Prevents card content from breaking the flex layout */
   padding-bottom: 12px;
 }
@@ -392,7 +393,8 @@ body {
 }
 
 .log-container {
-  height: 120px;
+  flex: 1 1 0;
+  min-height: 120px;
   box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
