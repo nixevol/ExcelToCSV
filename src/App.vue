@@ -393,10 +393,16 @@ body {
 
 .log-container {
   height: 120px;
-  overflow-y: auto;
+  box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
-  padding: 8px;
   background-color: var(--n-color-modal);
+}
+
+.log-container :deep(.n-log) {
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 </style>
