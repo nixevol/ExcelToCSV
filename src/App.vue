@@ -10,7 +10,7 @@ import {
   NConfigProvider, NGlobalStyle, darkTheme,
   NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog,
   NProgress, NText, useOsTheme,
-  NForm, NFormItem, NGrid, NGridItem,
+  NForm, NFormItem,
   NDataTable, NModal, NIcon, NTooltip, NDropdown
 } from "naive-ui";
 
@@ -407,7 +407,6 @@ const currentPercent = computed(() => {
            <n-log :log="logs" />
         </div>
       </n-card>
-
 
       <!-- About Modal -->
       <n-modal v-model:show="showAboutModal" preset="card" :title="t('about.title')" style="width: 400px">
