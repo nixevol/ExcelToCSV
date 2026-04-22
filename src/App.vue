@@ -2,7 +2,9 @@
 import { ref, onMounted, onUnmounted, h, computed } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
+import { open as openPath } from "@tauri-apps/plugin-opener";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWebview } from "@tauri-apps/api/webview";
 import {
   NConfigProvider, NGlobalStyle, darkTheme,
   NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog,
@@ -51,8 +53,28 @@ const encodingOptions = [
 // Event listeners
 let unlistenLog: () => void;
 let unlistenProgress: () => void;
+let unlistenDrop: () => void;
 
 onMounted(async () => {
+  unlistenDrop = await getCurrentWebview().onDragDropEvent(async (event) => {
+    if (event.payload.type === 'drop') {
+      const paths = event.payload.paths;
+      if (paths && paths.length > 0) {
+        const excelFiles = paths.filter(p => {
+          const lower = p.toLowerCase();
+          return lower.endsWith('.xls') || lower.endsWith('.xlsx') || lower.endsWith('.xlsm');
+        });
+        if (excelFiles.length > 0) {
+          const newPaths = excelFiles.filter(p => !selectedFiles.value.some(f => f.path === p));
+          if (newPaths.length > 0) {
+            const fileInfos: FileInfo[] = await invoke("get_file_info", { paths: newPaths });
+            selectedFiles.value = [...selectedFiles.value, ...fileInfos];
+          }
+        }
+      }
+    }
+  });
+
   unlistenLog = await listen("convert-log", (event: any) => {
     const payload = event.payload;
     const prefix = payload.level === "error" ? "❌ " : payload.level === "warn" ? "⚠️ " : "ℹ️ ";
@@ -80,6 +102,7 @@ onMounted(async () => {
 onUnmounted(() => {
   if (unlistenLog) unlistenLog();
   if (unlistenProgress) unlistenProgress();
+  if (unlistenDrop) unlistenDrop();
 });
 
 // Actions
@@ -140,6 +163,16 @@ const selectOutputDir = async () => {
   if (selected && typeof selected === 'string') {
     outputDir.value = selected;
   }
+};
+
+const openOutputDir = async () => {
+  if (outputDir.value) {
+    await openPath(outputDir.value);
+  }
+};
+
+const clearOutputDir = () => {
+  outputDir.value = null;
 };
 
 const clearFiles = () => {
@@ -226,7 +259,7 @@ const currentPercent = computed(() => {
         </div>
 
         <!-- File Data Table (Middle) -->
-        <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 160px;">
+        <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 220px;">
           <n-data-table
             :columns="columns"
             :data="selectedFiles"
@@ -255,8 +288,9 @@ const currentPercent = computed(() => {
             <n-form inline label-placement="left" size="small" :show-feedback="false" style="display: flex;">
               <n-form-item label="输出目录" style="margin: 0; flex: 1; min-width: 0;">
                 <div style="display: flex; gap: 8px; width: 100%;">
-                  <n-input v-model:value="outputDir" readonly placeholder="默认保存至原目录" style="flex: 1;" />
+                  <n-input v-model:value="outputDir" readonly placeholder="默认保存至原目录" style="flex: 1;" clearable @clear="clearOutputDir" />
                   <n-button @click="selectOutputDir" :disabled="isConverting">选择</n-button>
+                  <n-button @click="openOutputDir" :disabled="!outputDir || isConverting">打开</n-button>
                 </div>
               </n-form-item>
             </n-form>
