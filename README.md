@@ -1,7 +1,37 @@
-# Tauri + Vue + TypeScript
+# Excel To CSV 批量转换工具
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+高性能的大批量 Excel 转 CSV 桌面端处理工具，基于 Tauri v2 (Rust) 和 Vue 3 开发，专为极致的性能与内存安全设计。
 
-## Recommended IDE Setup
+## 特性
 
-- [VS Code](https://code.visualstudio.com/) + [Vue - Official](https://marketplace.visualstudio.com/items?itemName=Vue.volar) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+- **极速解析**: 采用 Rust 原生库 `calamine`，支持多线程并行异步处理，大幅缩短大文件解析时间。
+- **内存安全**: 采用流式写入机制，实时将 Excel 的每一行转存为 CSV，即使处理数 GB 的 Excel 也不会 OOM。
+- **一键导入**: 支持快捷拖拽文件导入，自动过滤不支持的格式。
+- **自定义命名**: 提供多种导出的命名规则组合（如时间戳后缀等）。
+- **编码控制**: 支持 GBK 和 UTF-8 输出，兼容国内业务及传统系统导入需求。
+- **排除规则**: 支持配置 Sheet 的排除关键字，无用表单自动跳过。
+- **深色模式**: 支持原生浅色/深色主题切换。
+
+## 开发环境
+
+### 依赖环境
+- **Node.js**: v18+
+- **Rust**: 1.70+
+- **Tauri CLI**: 2.x
+
+### 运行调试
+\`\`\`bash
+npm install
+npm run tauri dev
+\`\`\`
+
+### 构建发布
+\`\`\`bash
+npm run tauri build
+\`\`\`
+
+## 开发者
+**Nixevol**
+
+## 许可证
+MIT License

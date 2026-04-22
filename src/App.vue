@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted, h, computed } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { openPath } from "@tauri-apps/plugin-opener";
+import { openPath, openUrl } from "@tauri-apps/plugin-opener";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import {
@@ -15,6 +15,15 @@ import {
 
 const osTheme = useOsTheme();
 const theme = ref(osTheme.value === 'dark' ? darkTheme : null);
+
+const toggleTheme = () => {
+  theme.value = theme.value === darkTheme ? null : darkTheme;
+};
+
+const showAboutModal = ref(false);
+const openGithub = async () => {
+  await openUrl("https://github.com/nixevol/ExcelToCSV.git");
+};
 
 // Configuration state
 interface FileInfo {
@@ -232,6 +241,32 @@ const currentPercent = computed(() => {
           <n-space :size="8">
             <n-tooltip trigger="hover">
               <template #trigger>
+                <n-button circle size="small" @click="toggleTheme">
+                  <template #icon>
+                    <n-icon>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
+                    </n-icon>
+                  </template>
+                </n-button>
+              </template>
+              切换主题
+            </n-tooltip>
+
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button circle size="small" @click="showAboutModal = true">
+                  <template #icon>
+                    <n-icon>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
+                    </n-icon>
+                  </template>
+                </n-button>
+              </template>
+              关于
+            </n-tooltip>
+
+            <n-tooltip trigger="hover">
+              <template #trigger>
                 <n-button circle size="small" type="primary" @click="selectFiles" :disabled="isConverting">
                   <template #icon>
                     <n-icon>
@@ -346,6 +381,29 @@ const currentPercent = computed(() => {
            <n-log :log="logs" />
         </div>
       </n-card>
+
+      <!-- Footer -->
+      <div style="flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 4px; color: var(--n-text-color-3); font-size: 12px;">
+        <span>Developer: Nixevol</span>
+        <span>V1.0.1</span>
+      </div>
+
+      <!-- About Modal -->
+      <n-modal v-model:show="showAboutModal" preset="card" title="关于 Excel To CSV" style="width: 400px">
+        <n-space vertical align="center" style="text-align: center; padding: 20px 0;">
+          <h2 style="margin: 0;">Excel To CSV</h2>
+          <n-text depth="3">V1.0.1</n-text>
+          <n-text style="margin-top: 10px;">高性能的大批量 Excel 转 CSV 工具，专为极致的性能与内存安全设计。</n-text>
+          <n-button type="primary" style="margin-top: 20px;" @click="openGithub">
+            <template #icon>
+              <n-icon>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5c.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34c-.46-1.16-1.11-1.47-1.11-1.47c-.91-.62.07-.6.07-.6c1 .07 1.53 1.03 1.53 1.03c.87 1.52 2.34 1.07 2.91.83c.09-.65.35-1.09.63-1.34c-2.22-.25-4.55-1.11-4.55-4.92c0-1.11.38-2 1.03-2.71c-.1-.25-.45-1.29.1-2.64c0 0 .84-.27 2.75 1.02c.79-.22 1.65-.33 2.5-.33c.85 0 1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02c.55 1.35.2 2.39.1 2.64c.65.71 1.03 1.6 1.03 2.71c0 3.82-2.34 4.66-4.57 4.91c.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"></path></svg>
+              </n-icon>
+            </template>
+            访问 GitHub 主页
+          </n-button>
+        </n-space>
+      </n-modal>
 
       <!-- Filter Modal -->
       <n-modal v-model:show="showFilterModal" preset="card" title="Sheet 排除规则设置" style="width: 500px">
