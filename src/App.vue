@@ -57,7 +57,7 @@ const outputDir = ref<string | null>(null);
 const namingRule = ref(localStorage.getItem('app-naming-rule') || "excel-sheet-time");
 const encoding = ref(localStorage.getItem('app-encoding') || "GBK");
 const sheetFilters = ref<string[]>(JSON.parse(localStorage.getItem('app-sheet-filters') || '[]'));
-const maxThreads = ref(parseInt(localStorage.getItem('app-max-threads') || '4'));
+const maxThreads = ref(parseInt(localStorage.getItem('app-max-threads') || '2'));
 const showFilterModal = ref(false);
 
 watch(namingRule, (v) => localStorage.setItem('app-naming-rule', v));
@@ -395,7 +395,7 @@ const currentPercent = computed(() => {
                 <n-select v-model:value="encoding" :options="encodingOptions" :disabled="isConverting" style="width: 100px" />
               </n-form-item>
               <n-form-item :label="t('config.threads')" style="margin: 0; flex-shrink: 0;">
-                <n-input-number v-model:value="maxThreads" :min="1" :max="32" :disabled="isConverting" style="width: 80px" />
+                <n-input-number v-model:value="maxThreads" :min="1" :max="32" :disabled="isConverting" button-placement="both" :show-button="true" class="center-input" style="width: 100px" />
               </n-form-item>
             </n-form>
             
@@ -601,5 +601,17 @@ body {
 .toolbar-btn:hover {
   color: var(--n-primary-color);
   background-color: var(--n-button-color-2-hover, rgba(0, 0, 0, 0.04));
+}
+
+.center-input .n-input-wrapper {
+  padding: 0 !important;
+  justify-content: center !important;
+}
+
+.center-input .n-input__input-el,
+.center-input input {
+  text-align: center !important;
+  padding: 0 !important;
+  width: 100% !important;
 }
 </style>
