@@ -149,6 +149,8 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig) -> Result<(
                         Data::Int(i) => i.to_string(),
                         Data::Bool(b) => b.to_string(),
                         Data::DateTime(d) => d.to_string(),
+                        Data::DateTimeIso(d) => d.to_string(),
+                        Data::DurationIso(d) => d.to_string(),
                         Data::Error(e) => format!("ERROR: {:?}", e),
                     }
                 }).collect();
@@ -159,7 +161,8 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig) -> Result<(
             let mut final_file = file;
 
             if config.encoding == "GBK" {
-                let (cow, _, _) = GBK.encode(&String::from_utf8_lossy(&csv_bytes));
+                let lossy_str = String::from_utf8_lossy(&csv_bytes);
+                let (cow, _, _) = GBK.encode(&lossy_str);
                 let _ = final_file.write_all(&cow);
             } else {
                 let _ = final_file.write_all(&csv_bytes);
