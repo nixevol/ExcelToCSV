@@ -210,7 +210,7 @@ const getFileStem = (path: string) => {
           </n-grid-item>
           <n-grid-item>
             <n-card title="运行日志" style="height: 380px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-              <n-log :log="logs" rows="15" />
+              <n-log :log="logs" :rows="15" />
             </n-card>
           </n-grid-item>
         </n-grid>
