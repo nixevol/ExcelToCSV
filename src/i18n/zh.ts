@@ -1,4 +1,5 @@
 export default {
+  languageLabel: '简体中文',
   filter: {
     title: '设置排除关键字',
     modalTitle: 'Sheet 排除规则设置',
@@ -47,6 +48,7 @@ export default {
   about: {
     title: '关于',
     description: 'Excel 转 CSV 桌面工具',
+    developer: '开发者：Nixevol',
     github: '访问 GitHub 主页'
   }
 }

@@ -1,4 +1,5 @@
 export default {
+  languageLabel: 'English',
   filter: {
     title: 'Exclusion Rules',
     modalTitle: 'Sheet Exclusion Rules',
@@ -47,6 +48,7 @@ export default {
   about: {
     title: 'About',
     description: 'Excel to CSV Desktop Tool',
+    developer: 'Developer: Nixevol',
     github: 'Visit GitHub'
   }
 }

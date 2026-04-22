@@ -245,34 +245,38 @@ const currentPercent = computed(() => {
     <n-global-style />
     <div class="app-layout">
       <!-- Header Bar -->
-      <div style="flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 4px; color: var(--n-text-color-3); font-size: 12px;">
-        <div style="display: flex; align-items: center; gap: 4px;">
-          <n-button circle size="tiny" text @click="toggleTheme">
-            <template #icon>
-              <n-icon>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
-              </n-icon>
-            </template>
-          </n-button>
-          <n-dropdown :options="languageOptions" @select="handleLocaleSelect" trigger="click" size="small">
-            <n-button circle size="tiny" text>
-              <template #icon>
-                <n-icon>
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51l.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5l3.11 3.11l.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>
-                </n-icon>
-              </template>
-            </n-button>
-          </n-dropdown>
-        </div>
-        <div style="display: flex; align-items: center; gap: 4px;">
+      <div style="flex: 0 0 auto; display: flex; justify-content: flex-end; align-items: center; padding: 0 4px; gap: 8px; font-size: 12px;">
+        <!-- Theme Toggle -->
+        <n-button circle size="tiny" text @click="toggleTheme">
+          <template #icon>
+            <n-icon>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
+            </n-icon>
+          </template>
+        </n-button>
+
+        <!-- Language Selector -->
+        <n-dropdown :options="languageOptions" @select="handleLocaleSelect" trigger="click" size="small">
+          <div style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--n-text-color-2); padding: 2px 4px; border-radius: 4px;">
+            <n-icon :size="16">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51l.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5l3.11 3.11l.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>
+            </n-icon>
+            <span>{{ t('languageLabel') }}</span>
+            <n-icon :size="12">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6l1.41-1.41z"></path></svg>
+            </n-icon>
+          </div>
+        </n-dropdown>
+
+        <!-- Divider -->
+        <span style="color: var(--n-border-color);">|</span>
+
+        <!-- About + Version -->
+        <div style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--n-text-color-2);" @click="showAboutModal = true">
+          <n-icon :size="14">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
+          </n-icon>
           <span>V1.0.1</span>
-          <n-button circle size="tiny" text @click="showAboutModal = true">
-            <template #icon>
-              <n-icon>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
-              </n-icon>
-            </template>
-          </n-button>
         </div>
       </div>
 
@@ -414,6 +418,7 @@ const currentPercent = computed(() => {
           <h2 style="margin: 0;">Excel To CSV</h2>
           <n-text depth="3">V1.0.1</n-text>
           <n-text style="margin-top: 10px;">{{ t('about.description') }}</n-text>
+          <n-text depth="3" style="margin-top: 8px;">{{ t('about.developer') }}</n-text>
           <n-button type="primary" style="margin-top: 20px;" @click="openGithub">
             <template #icon>
               <n-icon>
