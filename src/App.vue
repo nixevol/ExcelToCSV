@@ -6,7 +6,7 @@ import { listen } from "@tauri-apps/api/event";
 import {
   NConfigProvider, NGlobalStyle, darkTheme,
   NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog,
-  NProgress, NText, useOsTheme, NLayout,
+  NProgress, NText, useOsTheme,
   NForm, NFormItem, NGrid, NGridItem,
   NDataTable, NModal, NIcon, NTooltip
 } from "naive-ui";
@@ -186,8 +186,7 @@ const currentPercent = computed(() => {
 <template>
   <n-config-provider :theme="theme" class="app-provider">
     <n-global-style />
-    <n-layout style="height: 100vh;" :native-scrollbar="false">
-      <div class="app-layout">
+    <div class="app-layout">
       <!-- Top Section: Config and File List -->
       <n-card class="top-card" size="small">
         
@@ -327,8 +326,7 @@ const currentPercent = computed(() => {
           </n-space>
         </template>
       </n-modal>
-      </div>
-    </n-layout>
+    </div>
   </n-config-provider>
 </template>
 
@@ -349,12 +347,13 @@ body {
 }
 
 .app-layout {
-  min-height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   padding: 12px;
   box-sizing: border-box;
   gap: 12px;
+  overflow: hidden;
   background: transparent;
 }
 
@@ -394,7 +393,7 @@ body {
 
 .log-container {
   flex: 1 1 0;
-  min-height: 120px;
+  height: 120px;
   box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
