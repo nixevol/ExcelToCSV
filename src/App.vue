@@ -213,11 +213,12 @@ const currentPercent = computed(() => {
         </n-space>
 
         <!-- File Data Table (Middle) -->
-        <div class="table-container" style="margin-bottom: 12px; margin-top: 0;">
+        <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 160px;">
           <n-data-table
             :columns="columns"
             :data="selectedFiles"
-            :max-height="160"
+            style="height: 100%;"
+            flex-height
             :scroll-x="600"
             size="small"
             virtual-scroll
