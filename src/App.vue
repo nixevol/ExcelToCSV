@@ -8,7 +8,7 @@ import {
   NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog,
   NProgress, NText, useOsTheme, NLayout,
   NForm, NFormItem, NGrid, NGridItem,
-  NDataTable, NModal
+  NDataTable, NModal, NIcon, NTooltip
 } from "naive-ui";
 
 const osTheme = useOsTheme();
@@ -191,26 +191,40 @@ const currentPercent = computed(() => {
       <!-- Top Section: Config and File List -->
       <n-card class="top-card" size="small">
         
-        <!-- File List Controls (Top) -->
-        <n-space style="margin-bottom: 8px;">
-          <n-button type="primary" @click="selectFiles" :disabled="isConverting">
-            导入 Excel 文件
-          </n-button>
-          <n-button @click="clearFiles" :disabled="isConverting || selectedFiles.length === 0">
-            清空列表
-          </n-button>
-          <n-button type="warning" ghost @click="showFilterModal = true" :disabled="isConverting">
+        <!-- File List Header (Top) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <n-button type="warning" ghost size="small" @click="showFilterModal = true" :disabled="isConverting">
             设置排除关键字
           </n-button>
-          <n-button 
-            type="success" 
-            @click="startConversion" 
-            :loading="isConverting"
-            :disabled="selectedFiles.length === 0"
-          >
-            开始批量转换
-          </n-button>
-        </n-space>
+
+          <n-space :size="8">
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button circle size="small" type="primary" @click="selectFiles" :disabled="isConverting">
+                  <template #icon>
+                    <n-icon>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z"></path></svg>
+                    </n-icon>
+                  </template>
+                </n-button>
+              </template>
+              导入 Excel 文件
+            </n-tooltip>
+            
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button circle size="small" type="error" ghost @click="clearFiles" :disabled="isConverting || selectedFiles.length === 0">
+                  <template #icon>
+                    <n-icon>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M17 6h5v2h-2v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8H2V6h5V3a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3zm1 2H6v12h12V8zm-9 3h2v6H9v-6zm4 0h2v6h-2v-6zM9 4v2h6V4H9z"></path></svg>
+                    </n-icon>
+                  </template>
+                </n-button>
+              </template>
+              清空列表
+            </n-tooltip>
+          </n-space>
+        </div>
 
         <!-- File Data Table (Middle) -->
         <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 160px;">
@@ -240,6 +254,15 @@ const currentPercent = computed(() => {
               <n-button @click="selectOutputDir" :disabled="isConverting">选择</n-button>
             </div>
           </n-form-item>
+          <n-button 
+            type="success" 
+            @click="startConversion" 
+            :loading="isConverting"
+            :disabled="selectedFiles.length === 0"
+            style="flex-shrink: 0;"
+          >
+            开始批量转换
+          </n-button>
         </n-form>
       </n-card>
 
