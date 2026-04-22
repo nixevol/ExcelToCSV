@@ -14,14 +14,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: "macos-latest" # 苹果 M 系列芯片 (aarch64) 和 Intel 芯片 (x86_64) 可以打一个 Universal App
-            args: "--target aarch64-apple-darwin"
           - platform: "macos-latest"
-            args: "--target x86_64-apple-darwin"
-          - platform: "ubuntu-22.04" # Linux 平台
-            args: ""
-          - platform: "windows-latest" # Windows 平台
-            args: ""
+            target: "aarch64-apple-darwin" # 苹果 M 系列芯片
+          - platform: "macos-latest"
+            target: "x86_64-apple-darwin" # 苹果 Intel 芯片
+          - platform: "ubuntu-22.04"
+            target: "x86_64-unknown-linux-gnu" # Linux x64
+          - platform: "windows-latest"
+            target: "x86_64-pc-windows-msvc" # Windows x64 (64位)
+          - platform: "windows-latest"
+            target: "i686-pc-windows-msvc" # Windows x86 (32位)
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -31,36 +33,32 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20" # 使用 LTS 版本
+          node-version: "20"
           cache: "npm"
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          # 如果是 Mac，则添加两种架构的支持
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          # 安装当前矩阵对应的目标架构支持
+          targets: ${{ matrix.target }}
 
       - name: Install dependencies (Ubuntu only)
         if: matrix.platform == 'ubuntu-22.04'
-        # Tauri 在 Linux 上依赖 WebKitGtk 等系统库
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Install frontend dependencies
-        # 因为我们之前看到项目里有 package-lock.json，所以使用 npm
         run: npm ci
 
       - name: Build and release Tauri app
         uses: tauri-apps/tauri-action@v0
         env:
-          # GitHub 会自动提供这个 token 用于发布 Release
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          # action 会自动将 __VERSION__ 替换为 tauri.conf.json 中的版本号
-          tagName: app-v__VERSION__ 
+          tagName: app-v__VERSION__
           releaseName: "ExcelToCSV v__VERSION__"
           releaseBody: "自动构建发布的版本，请在下方 Assets 下载对应平台的可执行文件。"
           releaseDraft: false
           prerelease: false
-          args: ${{ matrix.args }}
+          args: --target ${{ matrix.target }}
