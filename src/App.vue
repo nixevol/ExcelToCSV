@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, h, computed } from "vue";
+import { ref, onMounted, onUnmounted, h, computed, watch, nextTick } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -55,6 +55,15 @@ const showFilterModal = ref(false);
 const isConverting = ref(false);
 const isStopping = ref(false);
 const logs = ref<string>("");
+const logInstRef = ref<any>(null);
+
+watch(logs, () => {
+  nextTick(() => {
+    if (logInstRef.value) {
+      logInstRef.value.scrollTo({ position: 'bottom', silent: true });
+    }
+  });
+});
 
 // Progress state
 const totalProgress = ref({ current: 0, total: 0 });
@@ -416,9 +425,7 @@ const currentPercent = computed(() => {
 
         <!-- Logs -->
         <div class="log-container">
-          <n-scrollbar>
-            <n-log :log="logs" />
-          </n-scrollbar>
+           <n-log :log="logs" ref="logInstRef" />
         </div>
       </n-card>
 
@@ -474,7 +481,7 @@ body {
 }
 
 .app-layout {
-  height: 100vh;
+  /* height: 100vh; */
   display: flex;
   flex-direction: column;
   padding: 12px;
@@ -528,13 +535,9 @@ body {
   overflow: hidden;
 }
 
-.log-container :deep(.n-scrollbar) {
-  height: 100%;
-}
-
 .log-container :deep(.n-log) {
   padding: 8px;
   box-sizing: border-box;
-  overflow: hidden !important;
+  height: 100%;
 }
 </style>
