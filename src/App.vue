@@ -282,7 +282,13 @@ const currentPercent = computed(() => {
             size="small"
             virtual-scroll
             striped
-          />
+          >
+            <template #empty>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 0; color: var(--n-text-color-3);">
+                <span style="font-size: 13px;">请拖入需转换文件 / 点击右上角 + 添加文件</span>
+              </div>
+            </template>
+          </n-data-table>
         </div>
 
         <!-- Configuration row (Bottom) -->
