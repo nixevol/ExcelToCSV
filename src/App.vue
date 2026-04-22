@@ -8,7 +8,7 @@ import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { useI18n } from "vue-i18n";
 import {
   NConfigProvider, NGlobalStyle, darkTheme,
-  NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog, NScrollbar,
+  NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NScrollbar,
   NProgress, NText, useOsTheme,
   NForm, NFormItem,
   NDataTable, NModal, NIcon, NTooltip, NDropdown
@@ -17,11 +17,17 @@ import {
 const { t, locale } = useI18n();
 
 const osTheme = useOsTheme();
-const theme = ref(osTheme.value === 'dark' ? darkTheme : null);
+const savedTheme = localStorage.getItem('app-theme');
+const theme = ref(savedTheme ? (savedTheme === 'dark' ? darkTheme : null) : (osTheme.value === 'dark' ? darkTheme : null));
 
 const toggleTheme = () => {
   theme.value = theme.value?.name === 'dark' ? null : darkTheme;
 };
+
+watch(theme, (v) => localStorage.setItem('app-theme', v?.name === 'dark' ? 'dark' : 'light'));
+
+const savedLocale = localStorage.getItem('app-locale');
+if (savedLocale) locale.value = savedLocale;
 
 const languageOptions = [
   { label: '中文', key: 'zh' },
@@ -31,6 +37,8 @@ const languageOptions = [
 const handleLocaleSelect = (key: string) => {
   locale.value = key;
 };
+
+watch(() => locale.value, (v) => localStorage.setItem('app-locale', v));
 
 const showAboutModal = ref(false);
 const openGithub = async () => {
@@ -46,10 +54,14 @@ interface FileInfo {
 }
 const selectedFiles = ref<FileInfo[]>([]);
 const outputDir = ref<string | null>(null);
-const namingRule = ref("excel-sheet-time");
-const encoding = ref("GBK");
-const sheetFilters = ref<string[]>([]);
+const namingRule = ref(localStorage.getItem('app-naming-rule') || "excel-sheet-time");
+const encoding = ref(localStorage.getItem('app-encoding') || "GBK");
+const sheetFilters = ref<string[]>(JSON.parse(localStorage.getItem('app-sheet-filters') || '[]'));
 const showFilterModal = ref(false);
+
+watch(namingRule, (v) => localStorage.setItem('app-naming-rule', v));
+watch(encoding, (v) => localStorage.setItem('app-encoding', v));
+watch(sheetFilters, (v) => localStorage.setItem('app-sheet-filters', JSON.stringify(v)), { deep: true });
 
 // UI state
 const isConverting = ref(false);
@@ -87,6 +99,15 @@ let unlistenProgress: () => void;
 let unlistenDrop: () => void;
 
 onMounted(async () => {
+  // 禁用右键菜单
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  // 禁用 F12、Ctrl+Shift+I/J/C 等开发者工具快捷键
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F12') e.preventDefault();
+    if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase())) e.preventDefault();
+    if (e.ctrlKey && e.key.toUpperCase() === 'U') e.preventDefault();
+  });
+
   unlistenDrop = await getCurrentWebview().onDragDropEvent(async (event) => {
     if (event.payload.type === 'drop') {
       const paths = event.payload.paths;
@@ -108,9 +129,11 @@ onMounted(async () => {
 
   unlistenLog = await listen("convert-log", (event: any) => {
     const payload = event.payload;
-    const prefix = payload.level === "error" ? "❌ " : payload.level === "warn" ? "⚠️ " : "ℹ️ ";
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    const level = (payload.level || 'info').toUpperCase();
     const translatedMsg = t(`log.${payload.code}`, payload.args || {});
-    logs.value += `${prefix}${translatedMsg}\n`;
+    logs.value += `${time} - ${level} - ${translatedMsg}\n`;
   });
 
   unlistenProgress = await listen("convert-progress", (event: any) => {
@@ -224,7 +247,9 @@ const startConversion = async () => {
       }
     });
   } catch (error) {
-    logs.value += `❌ ${t('status.fatalError')}: ${error}\n`;
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+    logs.value += `${time} - ERROR - ${t('status.fatalError')}: ${error}\n`;
   } finally {
     isConverting.value = false;
     isStopping.value = false;
@@ -254,51 +279,59 @@ const currentPercent = computed(() => {
   <n-config-provider :theme="theme" class="app-provider">
     <n-global-style />
     <div class="app-layout">
-      <!-- Header Bar -->
-      <div style="flex: 0 0 auto; display: flex; justify-content: flex-end; align-items: center; padding: 0 4px; gap: 8px; font-size: 12px;">
-        <!-- Theme Toggle -->
-        <div style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--n-text-color-2); padding: 2px 4px; border-radius: 4px;" @click="toggleTheme">
-          <n-icon :size="16">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
-          </n-icon>
-          <span>{{ theme?.name === 'dark' ? t('theme.dark') : t('theme.light') }}</span>
-        </div>
-
-        <!-- Language Selector -->
-        <n-dropdown :options="languageOptions" @select="handleLocaleSelect" trigger="click" size="small">
-          <div style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--n-text-color-2); padding: 2px 4px; border-radius: 4px;">
-            <n-icon :size="16">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51l.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5l3.11 3.11l.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>
-            </n-icon>
-            <span>{{ t('languageLabel') }}</span>
-            <n-icon :size="12">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6l1.41-1.41z"></path></svg>
-            </n-icon>
-          </div>
-        </n-dropdown>
-
-        <!-- Divider -->
-        <span style="color: var(--n-border-color);">|</span>
-
-        <!-- About + Version -->
-        <div style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--n-text-color-2);" @click="showAboutModal = true">
-          <n-icon :size="14">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
-          </n-icon>
-          <span>V1.0.1</span>
-        </div>
-      </div>
-
       <!-- Top Section: Config and File List -->
       <n-card class="top-card" size="small">
         
         <!-- File List Header (Top) -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-          <n-button type="warning" ghost size="small" @click="showFilterModal = true" :disabled="isConverting">
-            {{ t('filter.title') }}
-          </n-button>
+          <!-- Left side tools -->
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 12px;">
+            <!-- Theme Toggle -->
+            <div class="toolbar-btn" @click="toggleTheme">
+              <n-icon :size="16">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
+              </n-icon>
+              <span>{{ theme?.name === 'dark' ? t('theme.dark') : t('theme.light') }}</span>
+            </div>
 
-          <n-space :size="8">
+            <!-- Language Selector -->
+            <n-dropdown :options="languageOptions" @select="handleLocaleSelect" trigger="click" size="small">
+              <div class="toolbar-btn">
+                <n-icon :size="16">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12.87 15.07l-2.54-2.51l.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35C8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5l3.11 3.11l.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7l1.62-4.33L19.12 17h-3.24z"></path></svg>
+                </n-icon>
+                <span>{{ t('languageLabel') }}</span>
+                <n-icon :size="12">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6l-6-6l1.41-1.41z"></path></svg>
+                </n-icon>
+              </div>
+            </n-dropdown>
+
+            <!-- Divider -->
+            <span style="color: var(--n-border-color);">|</span>
+
+            <!-- About + Version -->
+            <div class="toolbar-btn" @click="showAboutModal = true">
+              <n-icon :size="14">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
+              </n-icon>
+              <span>V1.0.1</span>
+            </div>
+          </div>
+          <n-space :size="12">
+            <n-tooltip trigger="hover">
+              <template #trigger>
+                <n-button circle size="small" type="warning" ghost @click="showFilterModal = true" :disabled="isConverting">
+                  <template #icon>
+                    <n-icon>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 18h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM3 7c0 .55.45 1 1 1h16c.55 0 1-.45 1-1s-.45-1-1-1H4c-.55 0-1 .45-1 1zm4 6h10c.55 0 1-.45 1-1s-.45-1-1-1H7c-.55 0-1 .45-1 1s.45 1 1 1z"></path></svg>
+                    </n-icon>
+                  </template>
+                </n-button>
+              </template>
+              {{ t('filter.title') }}
+            </n-tooltip>
+
             <n-tooltip trigger="hover">
               <template #trigger>
                 <n-button circle size="small" type="primary" @click="selectFiles" :disabled="isConverting">
@@ -328,7 +361,7 @@ const currentPercent = computed(() => {
         </div>
 
         <!-- File Data Table (Middle) -->
-        <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 220px;">
+        <div class="table-container" style="margin-bottom: 12px; height: 220px;">
           <n-data-table
             :columns="columns"
             :data="selectedFiles"
@@ -426,7 +459,7 @@ const currentPercent = computed(() => {
         <!-- Logs -->
         <div class="log-container">
           <n-scrollbar ref="scrollbarRef">
-            <n-log :log="logs" />
+            <pre class="log-pre">{{ logs }}</pre>
           </n-scrollbar>
         </div>
       </n-card>
@@ -500,25 +533,21 @@ body {
 }
 
 .table-container {
-  margin-top: 8px;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
 }
 
 .bottom-card {
-  flex: 1 1 0;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
-/* This targets the inner content box of n-card to make it flex correctly */
 .bottom-card > .n-card__content {
   display: flex;
   flex-direction: column;
-  flex: 1 1 0;
-  overflow: hidden;
   padding-bottom: 12px;
 }
 
@@ -528,8 +557,8 @@ body {
 }
 
 .log-container {
-  flex: 1 1 0;
-  height: 120px;
+  min-height: 120px;
+  max-height: 200px;
   box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
@@ -538,12 +567,33 @@ body {
 }
 
 .log-container :deep(.n-scrollbar) {
-  height: 100%;
+  max-height: 200px;
 }
 
-.log-container :deep(.n-log) {
+.log-pre {
+  margin: 0;
   padding: 8px;
-  box-sizing: border-box;
-  overflow: hidden !important;
+  font-family: v-mono, SFMono-Regular, Menlo, Consolas, Courier, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--n-text-color);
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--n-text-color-3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.toolbar-btn:hover {
+  color: var(--n-primary-color);
+  background-color: var(--n-button-color-2-hover, rgba(0, 0, 0, 0.04));
 }
 </style>
