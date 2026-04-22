@@ -189,7 +189,7 @@ const currentPercent = computed(() => {
     <n-layout class="app-layout">
       
       <!-- Top Section: Config and File List -->
-      <n-card class="top-card" title="Excel 转 CSV 高效处理器" size="small">
+      <n-card class="top-card" size="small">
         <template #header-extra>
           <n-button type="info" ghost @click="showFilterModal = true" :disabled="isConverting" size="small">
             设置排除关键字
