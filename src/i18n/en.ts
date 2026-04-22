@@ -46,7 +46,6 @@ export default {
     totalProgress: 'Total Progress',
     files: 'Files',
     currentProcessing: 'Processing: ',
-    waiting: 'Waiting...',
     fatalError: 'Fatal Error'
   },
   about: {

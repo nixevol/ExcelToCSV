@@ -375,36 +375,41 @@ const currentPercent = computed(() => {
 
       <!-- Bottom Section: Progress and Logs -->
       <n-card class="bottom-card" :title="t('status.title')" size="small">
-        <div class="progress-section">
+        <div class="progress-section" style="display: flex; flex-direction: column; gap: 12px;">
           <!-- Total Progress -->
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-            <n-text strong style="white-space: nowrap; font-size: 12px;">{{ t('status.totalProgress') }}</n-text>
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <n-text strong style="font-size: 12px;">{{ t('status.totalProgress') }}</n-text>
+              <n-text depth="3" style="font-size: 12px;">{{ totalProgress.current }} / {{ totalProgress.total }} {{ t('status.files') }}</n-text>
+            </div>
             <n-progress 
               type="line" 
               :percentage="totalPercent" 
               :status="isConverting ? 'info' : (totalProgress.total > 0 && totalProgress.current === totalProgress.total ? 'success' : 'default')"
               :processing="isConverting"
               :show-indicator="totalProgress.total > 0"
-              style="flex: 1;"
             />
-            <n-text depth="3" style="white-space: nowrap; font-size: 12px; min-width: 70px; text-align: right;">{{ totalProgress.current }}/{{ totalProgress.total }} {{ t('status.files') }}</n-text>
           </div>
 
           <!-- Current File Progress -->
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <n-text style="white-space: nowrap; font-size: 12px; max-width: 240px; overflow: hidden; text-overflow: ellipsis;">
-              <n-text strong style="font-size: 12px;">{{ t('status.currentProcessing') }}</n-text>
-              <n-text type="primary" style="font-size: 12px;">{{ currentFileProgress.filename || t('status.waiting') }}</n-text>
-            </n-text>
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <div style="font-size: 12px; display: flex; align-items: center; gap: 4px; overflow: hidden;">
+                <n-text strong style="flex-shrink: 0;">{{ t('status.currentProcessing') }}</n-text>
+                <n-text type="primary" v-if="currentFileProgress.filename" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  {{ currentFileProgress.filename }}
+                </n-text>
+                <n-text depth="3" v-else>-</n-text>
+              </div>
+              <n-text depth="3" style="font-size: 12px; flex-shrink: 0;">{{ currentFileProgress.current }} / {{ currentFileProgress.total }} Sheet</n-text>
+            </div>
             <n-progress 
               type="line" 
               :percentage="currentPercent" 
               status="default"
               :processing="isConverting"
               :show-indicator="currentFileProgress.total > 0"
-              style="flex: 1;"
             />
-            <n-text depth="3" style="white-space: nowrap; font-size: 12px; min-width: 70px; text-align: right;">{{ currentFileProgress.current }}/{{ currentFileProgress.total }} Sheet</n-text>
           </div>
         </div>
 

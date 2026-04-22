@@ -46,7 +46,6 @@ export default {
     totalProgress: '总进度',
     files: '文件',
     currentProcessing: '当前处理：',
-    waiting: '等待中...',
     fatalError: '致命错误'
   },
   about: {
