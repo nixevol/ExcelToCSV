@@ -233,6 +233,30 @@ const currentPercent = computed(() => {
   <n-config-provider :theme="theme" class="app-provider">
     <n-global-style />
     <div class="app-layout">
+      <!-- Header Bar -->
+      <div style="flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 4px; color: var(--n-text-color-3); font-size: 12px;">
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <n-button circle size="tiny" text @click="toggleTheme">
+            <template #icon>
+              <n-icon>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
+              </n-icon>
+            </template>
+          </n-button>
+          <span>Developer: Nixevol</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span>V1.0.1</span>
+          <n-button circle size="tiny" text @click="showAboutModal = true">
+            <template #icon>
+              <n-icon>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
+              </n-icon>
+            </template>
+          </n-button>
+        </div>
+      </div>
+
       <!-- Top Section: Config and File List -->
       <n-card class="top-card" size="small">
         
@@ -285,7 +309,7 @@ const currentPercent = computed(() => {
           >
             <template #empty>
               <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 0; color: var(--n-text-color-3);">
-                <span style="font-size: 13px;">请拖入需转换文件 / 点击右上角 + 添加文件</span>
+                <span style="font-size: 13px;">请拖入需转换文件 / 点击右上角 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" style="vertical-align: middle; color: #18a058;"><circle cx="12" cy="12" r="11" fill="currentColor"/><path fill="white" d="M11 11V7h2v4h4v2h-4v4h-2v-4H7v-2z"/></svg> 添加文件</span>
               </div>
             </template>
           </n-data-table>
@@ -365,29 +389,6 @@ const currentPercent = computed(() => {
         </div>
       </n-card>
 
-      <!-- Footer -->
-      <div style="flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 4px; color: var(--n-text-color-3); font-size: 12px;">
-        <div style="display: flex; align-items: center; gap: 4px;">
-          <n-button circle size="tiny" text @click="toggleTheme">
-            <template #icon>
-              <n-icon>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
-              </n-icon>
-            </template>
-          </n-button>
-          <span>Developer: Nixevol</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 4px;">
-          <span>V1.0.1</span>
-          <n-button circle size="tiny" text @click="showAboutModal = true">
-            <template #icon>
-              <n-icon>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
-              </n-icon>
-            </template>
-          </n-button>
-        </div>
-      </div>
 
       <!-- About Modal -->
       <n-modal v-model:show="showAboutModal" preset="card" title="关于" style="width: 400px">
