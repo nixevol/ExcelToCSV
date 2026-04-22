@@ -190,11 +190,6 @@ const currentPercent = computed(() => {
       
       <!-- Top Section: Config and File List -->
       <n-card class="top-card" size="small">
-        <template #header-extra>
-          <n-button type="info" ghost @click="showFilterModal = true" :disabled="isConverting" size="small">
-            设置排除关键字
-          </n-button>
-        </template>
         
         <!-- File List Controls (Top) -->
         <n-space style="margin-bottom: 8px;">
@@ -203,6 +198,9 @@ const currentPercent = computed(() => {
           </n-button>
           <n-button @click="clearFiles" :disabled="isConverting || selectedFiles.length === 0">
             清空列表
+          </n-button>
+          <n-button type="warning" ghost @click="showFilterModal = true" :disabled="isConverting">
+            设置排除关键字
           </n-button>
           <n-button 
             type="success" 
