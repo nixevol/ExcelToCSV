@@ -53,3 +53,4 @@
   - **配置持久化**：采用 `localStorage` 与 `watch` 自动保存机制，对界面主题、语言偏好、命名规则、字符编码、过滤关键字、最大线程数六项配置实现了持久化。
   - **转换性能优化**：CSV 写入改为 `BufWriter` 流式直写磁盘（UTF-8 零额外内存），GBK 模式通过自定义 `GbkEncoder` 流式编码；行缓冲区 `Vec<String>` 跨行复用减少内存分配。
   - **多线程并行转换**：引入 `rayon` 线程池，按文件维度并行处理，线程数可通过前端 UI 配置（1-32），默认 2 线程。每个线程独立持有 `row_buf` 和 `workbook`，通过 `AtomicBool` 共享取消信号。数字输入组件进行了样式强制覆盖，实现了精确居中对齐和分离按钮模式。
+  - **CI/CD 发布自动化**：配置了 GitHub Actions (`.github/workflows/release.yml`)。支持通过打 `v*` 标签自动构建针对 Windows, macOS (Apple Silicon + Intel), 和 Ubuntu 的平台可执行文件并发布到 GitHub Releases 中。
