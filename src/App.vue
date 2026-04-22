@@ -517,16 +517,16 @@ body {
 
 .log-container {
   flex: 1 1 0;
-  height: 120px;
+  min-height: 80px;
   box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
   background-color: var(--n-color-modal);
   overflow-y: auto;
+  padding: 8px;
 }
 
 .log-container :deep(.n-log) {
-  padding: 8px;
-  box-sizing: border-box;
+  margin: 0;
 }
 </style>
