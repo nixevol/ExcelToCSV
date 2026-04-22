@@ -44,3 +44,8 @@
 2.  **指令下发**: 前端通过 Tauri IPC (`invoke`) 将文件路径列表和配置参数 (JSON) 传递给 Rust 进程。
 3.  **核心处理**: Rust 接管任务，利用 `calamine` 逐个加载文件，遍历 Sheets 执行过滤，并流式转换写入 CSV。
 4.  **状态同步**: Rust 在处理期间，通过 Tauri Event 机制不断向前端抛出 `progress` 和 `log` 事件，前端响应式更新界面进度条和日志板。
+
+## 5. 当前开发进度 (Progress)
+- **2026-04-22**: 完成了前后端核心功能的实现。
+  - 前端 (`src/App.vue`): 使用 Vue 3 + Naive UI 搭建了配置表单、文件上传、日志控制台与多进度条界面。
+  - 后端 (`src-tauri/src/lib.rs`): 使用 `calamine` 实现了 Excel 的解析，并利用 `csv` 和 `encoding_rs` 进行文件写入，实现了通过 Tauri API 返回进度和日志消息。
