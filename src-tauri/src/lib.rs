@@ -8,6 +8,25 @@ use std::path::Path;
 use tauri::{AppHandle, Emitter};
 use chrono::Local;
 
+#[derive(Serialize)]
+struct FileInfo {
+    path: String,
+    name: String,
+    extension: String,
+    size_bytes: u64,
+}
+
+#[tauri::command]
+fn get_file_info(paths: Vec<String>) -> Vec<FileInfo> {
+    paths.into_iter().map(|path| {
+        let p = Path::new(&path);
+        let name = p.file_name().unwrap_or_default().to_string_lossy().to_string();
+        let extension = p.extension().unwrap_or_default().to_string_lossy().to_string();
+        let size_bytes = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+        FileInfo { path, name, extension, size_bytes }
+    }).collect()
+}
+
 #[derive(Clone, Serialize)]
 struct ProgressPayload {
     file_idx: usize,
@@ -182,7 +201,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![convert_excel_to_csv])
+        .invoke_handler(tauri::generate_handler![convert_excel_to_csv, get_file_info])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
