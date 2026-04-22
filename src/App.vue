@@ -8,7 +8,7 @@ import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { useI18n } from "vue-i18n";
 import {
   NConfigProvider, NGlobalStyle, darkTheme,
-  NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NScrollbar,
+  NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NScrollbar, NInputNumber,
   NProgress, NText, useOsTheme,
   NForm, NFormItem,
   NDataTable, NModal, NIcon, NTooltip, NDropdown
@@ -57,11 +57,13 @@ const outputDir = ref<string | null>(null);
 const namingRule = ref(localStorage.getItem('app-naming-rule') || "excel-sheet-time");
 const encoding = ref(localStorage.getItem('app-encoding') || "GBK");
 const sheetFilters = ref<string[]>(JSON.parse(localStorage.getItem('app-sheet-filters') || '[]'));
+const maxThreads = ref(parseInt(localStorage.getItem('app-max-threads') || '4'));
 const showFilterModal = ref(false);
 
 watch(namingRule, (v) => localStorage.setItem('app-naming-rule', v));
 watch(encoding, (v) => localStorage.setItem('app-encoding', v));
 watch(sheetFilters, (v) => localStorage.setItem('app-sheet-filters', JSON.stringify(v)), { deep: true });
+watch(maxThreads, (v) => localStorage.setItem('app-max-threads', String(v)));
 
 // UI state
 const isConverting = ref(false);
@@ -244,6 +246,7 @@ const startConversion = async () => {
         naming_rule: namingRule.value,
         encoding: encoding.value,
         sheet_filters: sheetFilters.value,
+        max_threads: maxThreads.value,
       }
     });
   } catch (error) {
@@ -390,6 +393,9 @@ const currentPercent = computed(() => {
               </n-form-item>
               <n-form-item :label="t('config.encoding')" style="margin: 0; flex-shrink: 0;">
                 <n-select v-model:value="encoding" :options="encodingOptions" :disabled="isConverting" style="width: 100px" />
+              </n-form-item>
+              <n-form-item :label="t('config.threads')" style="margin: 0; flex-shrink: 0;">
+                <n-input-number v-model:value="maxThreads" :min="1" :max="32" :disabled="isConverting" style="width: 80px" />
               </n-form-item>
             </n-form>
             

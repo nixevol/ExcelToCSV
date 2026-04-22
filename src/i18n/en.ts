@@ -28,6 +28,7 @@ export default {
   config: {
     namingRule: 'Naming Rule',
     encoding: 'Encoding',
+    threads: 'Threads',
     outputDir: 'Output Dir',
     outputPlaceholder: 'Default: same as source',
     select: 'Select'

@@ -28,6 +28,7 @@ export default {
   config: {
     namingRule: '命名规则',
     encoding: '文件编码',
+    threads: '线程数',
     outputDir: '输出目录',
     outputPlaceholder: '默认保存至原目录',
     select: '选择'
