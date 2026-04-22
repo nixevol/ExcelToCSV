@@ -17,7 +17,7 @@ const osTheme = useOsTheme();
 const theme = ref(osTheme.value === 'dark' ? darkTheme : null);
 
 const toggleTheme = () => {
-  theme.value = theme.value === darkTheme ? null : darkTheme;
+  theme.value = theme.value?.name === 'dark' ? null : darkTheme;
 };
 
 const showAboutModal = ref(false);
@@ -41,6 +41,7 @@ const showFilterModal = ref(false);
 
 // UI state
 const isConverting = ref(false);
+const isStopping = ref(false);
 const logs = ref<string>("");
 
 // Progress state
@@ -191,6 +192,7 @@ const clearFiles = () => {
 const startConversion = async () => {
   if (selectedFiles.value.length === 0) return;
   isConverting.value = true;
+  isStopping.value = false;
   logs.value = "";
   totalProgress.value = { current: 0, total: selectedFiles.value.length };
   currentFileProgress.value = { current: 0, total: 0, filename: "" };
@@ -209,7 +211,14 @@ const startConversion = async () => {
     logs.value += `❌ 致命错误: ${error}\n`;
   } finally {
     isConverting.value = false;
+    isStopping.value = false;
   }
+};
+
+const stopConversion = async () => {
+  if (!isConverting.value) return;
+  isStopping.value = true;
+  await invoke("cancel_conversion");
 };
 
 // Computed
@@ -239,32 +248,6 @@ const currentPercent = computed(() => {
           </n-button>
 
           <n-space :size="8">
-            <n-tooltip trigger="hover">
-              <template #trigger>
-                <n-button circle size="small" @click="toggleTheme">
-                  <template #icon>
-                    <n-icon>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
-                    </n-icon>
-                  </template>
-                </n-button>
-              </template>
-              切换主题
-            </n-tooltip>
-
-            <n-tooltip trigger="hover">
-              <template #trigger>
-                <n-button circle size="small" @click="showAboutModal = true">
-                  <template #icon>
-                    <n-icon>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
-                    </n-icon>
-                  </template>
-                </n-button>
-              </template>
-              关于
-            </n-tooltip>
-
             <n-tooltip trigger="hover">
               <template #trigger>
                 <n-button circle size="small" type="primary" @click="selectFiles" :disabled="isConverting">
@@ -333,13 +316,13 @@ const currentPercent = computed(() => {
 
           <!-- Right side Start Button -->
           <n-button 
-            type="success" 
-            @click="startConversion" 
-            :loading="isConverting"
+            :type="isConverting ? 'error' : 'success'" 
+            @click="isConverting ? stopConversion() : startConversion()" 
+            :loading="isStopping"
             :disabled="selectedFiles.length === 0"
             style="flex-shrink: 0; height: auto;"
           >
-            开始批量转换
+            {{ isConverting ? '停止转换' : '开始转换' }}
           </n-button>
         </div>
       </n-card>
@@ -384,8 +367,26 @@ const currentPercent = computed(() => {
 
       <!-- Footer -->
       <div style="flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 4px; color: var(--n-text-color-3); font-size: 12px;">
-        <span>Developer: Nixevol</span>
-        <span>V1.0.1</span>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <n-button circle size="tiny" text @click="toggleTheme">
+            <template #icon>
+              <n-icon>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
+              </n-icon>
+            </template>
+          </n-button>
+          <span>Developer: Nixevol</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span>V1.0.1</span>
+          <n-button circle size="tiny" text @click="showAboutModal = true">
+            <template #icon>
+              <n-icon>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8z"></path></svg>
+              </n-icon>
+            </template>
+          </n-button>
+        </div>
       </div>
 
       <!-- About Modal -->
@@ -490,12 +491,11 @@ body {
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
   background-color: var(--n-color-modal);
+  overflow-y: auto;
 }
 
 .log-container :deep(.n-log) {
-  height: 100%;
   padding: 8px;
   box-sizing: border-box;
-  overflow-y: auto;
 }
 </style>

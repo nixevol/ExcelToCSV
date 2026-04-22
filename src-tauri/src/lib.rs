@@ -5,8 +5,11 @@ use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use tauri::{AppHandle, Emitter};
+use std::sync::atomic::{AtomicBool, Ordering};
+use tauri::{AppHandle, Emitter, State};
 use chrono::Local;
+
+struct CancelFlag(AtomicBool);
 
 #[derive(Serialize)]
 struct FileInfo {
@@ -82,11 +85,22 @@ fn emit_progress(
 }
 
 #[tauri::command]
-async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig) -> Result<(), String> {
+fn cancel_conversion(cancel_flag: State<'_, CancelFlag>) {
+    cancel_flag.0.store(true, Ordering::SeqCst);
+}
+
+#[tauri::command]
+async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig, cancel_flag: State<'_, CancelFlag>) -> Result<(), String> {
+    cancel_flag.0.store(false, Ordering::SeqCst);
     let total_files = config.files.len();
     emit_log(&app, "info", &format!("========== 开始处理，共 {} 个文件 ==========", total_files));
 
     for (file_idx, file_path_str) in config.files.iter().enumerate() {
+        if cancel_flag.0.load(Ordering::SeqCst) {
+            emit_log(&app, "warn", "转换被用户手动取消！");
+            break;
+        }
+
         let file_path = Path::new(file_path_str);
         let file_name = file_path.file_stem().unwrap_or_default().to_string_lossy().to_string();
         
@@ -105,6 +119,11 @@ async fn convert_excel_to_csv(app: AppHandle, config: ConvertConfig) -> Result<(
         emit_log(&app, "info", &format!("成功读取到 {} 个 Sheet", total_sheets));
         
         for (sheet_idx, sheet_name) in sheets.iter().enumerate() {
+            if cancel_flag.0.load(Ordering::SeqCst) {
+                emit_log(&app, "warn", "转换被用户手动取消！");
+                break;
+            }
+
             emit_progress(&app, file_idx, total_files, sheet_idx + 1, total_sheets, &file_name, sheet_name, "parsing");
             
             // Sheet Filter Logic
@@ -201,7 +220,8 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![convert_excel_to_csv, get_file_info])
+        .manage(CancelFlag(AtomicBool::new(false)))
+        .invoke_handler(tauri::generate_handler![convert_excel_to_csv, get_file_info, cancel_conversion])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
