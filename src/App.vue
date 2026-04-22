@@ -8,7 +8,7 @@ import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { useI18n } from "vue-i18n";
 import {
   NConfigProvider, NGlobalStyle, darkTheme,
-  NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog,
+  NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NLog, NScrollbar,
   NProgress, NText, useOsTheme,
   NForm, NFormItem,
   NDataTable, NModal, NIcon, NTooltip, NDropdown
@@ -55,12 +55,12 @@ const showFilterModal = ref(false);
 const isConverting = ref(false);
 const isStopping = ref(false);
 const logs = ref<string>("");
-const logContainerRef = ref<HTMLElement | null>(null);
+const scrollbarRef = ref<InstanceType<typeof NScrollbar> | null>(null);
 
 watch(logs, () => {
   nextTick(() => {
-    if (logContainerRef.value) {
-      logContainerRef.value.scrollTop = logContainerRef.value.scrollHeight;
+    if (scrollbarRef.value) {
+      scrollbarRef.value.scrollTo({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' });
     }
   });
 });
@@ -424,8 +424,10 @@ const currentPercent = computed(() => {
         </div>
 
         <!-- Logs -->
-        <div class="log-container" ref="logContainerRef">
-           <n-log :log="logs" />
+        <div class="log-container">
+          <n-scrollbar ref="scrollbarRef">
+            <n-log :log="logs" />
+          </n-scrollbar>
         </div>
       </n-card>
 
@@ -532,26 +534,16 @@ body {
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
   background-color: var(--n-color-modal);
-  overflow-y: auto;
+  overflow: hidden;
 }
 
-.log-container::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.log-container::-webkit-scrollbar-thumb {
-  background-color: rgba(144, 147, 153, 0.3);
-  border-radius: 4px;
-}
-.log-container::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(144, 147, 153, 0.5);
-}
-.log-container::-webkit-scrollbar-track {
-  background: transparent;
+.log-container :deep(.n-scrollbar) {
+  height: 100%;
 }
 
 .log-container :deep(.n-log) {
   padding: 8px;
   box-sizing: border-box;
+  overflow: hidden !important;
 }
 </style>

@@ -48,3 +48,4 @@
 - **2026-04-22**: 完成了前后端核心功能的实现及 UI 精修排版。
   - 前端 (`src/App.vue`): Vue 3 + Naive UI 搭建配置表单、文件上传、日志控制台与进度条界面。支持拖拽导入、可终止转换、主题切换、中英文国际化切换等功能。语言包位于 `src/i18n/` 目录。
   - 后端 (`src-tauri/src/lib.rs`): 使用 `calamine` 解析 Excel 并写入 CSV，支持通过 `AtomicBool` 标志响应前端的中断请求。
+  - 日志框使用 Naive UI 的 `NScrollbar` 组件包裹 `NLog`，滚动条仅在鼠标悬停时显示。自动滚动通过 `scrollbarRef.scrollTo()` 实现。`n-log` 设置 `overflow: hidden` 避免底部留白。
