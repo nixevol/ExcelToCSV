@@ -5,6 +5,7 @@ on:
     # 只有推送形如 v1.0.0 这样的 tag 时才会触发工作流
     tags:
       - "v*"
+  workflow_dispatch: # 允许在 GitHub 网页端手动点击按钮触发
 
 jobs:
   publish-tauri:
