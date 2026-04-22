@@ -318,7 +318,7 @@ const currentPercent = computed(() => {
         </div>
 
         <!-- File Data Table (Middle) -->
-        <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 220px;">
+        <div class="table-container" style="margin-bottom: 12px; margin-top: 0; height: 180px;">
           <n-data-table
             :columns="columns"
             :data="selectedFiles"
@@ -495,6 +495,7 @@ body {
 
 .bottom-card {
   flex: 1 1 0;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -506,6 +507,7 @@ body {
   display: flex;
   flex-direction: column;
   flex: 1 1 0;
+  min-height: 0;
   overflow: hidden;
   padding-bottom: 12px;
 }
