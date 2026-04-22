@@ -2,7 +2,7 @@
 import { ref, onMounted, onUnmounted, h, computed } from "vue";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { openPath, openUrl } from "@tauri-apps/plugin-opener";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWebview } from "@tauri-apps/api/webview";
 import {
@@ -175,11 +175,6 @@ const selectOutputDir = async () => {
   }
 };
 
-const openOutputDir = async () => {
-  if (outputDir.value) {
-    await openPath(outputDir.value);
-  }
-};
 
 const clearOutputDir = () => {
   outputDir.value = null;
@@ -308,7 +303,6 @@ const currentPercent = computed(() => {
                 <div style="display: flex; gap: 8px; width: 100%;">
                   <n-input v-model:value="outputDir" readonly placeholder="默认保存至原目录" style="flex: 1;" clearable @clear="clearOutputDir" />
                   <n-button @click="selectOutputDir" :disabled="isConverting">选择</n-button>
-                  <n-button @click="openOutputDir" :disabled="!outputDir || isConverting">打开</n-button>
                 </div>
               </n-form-item>
             </n-form>
@@ -390,11 +384,11 @@ const currentPercent = computed(() => {
       </div>
 
       <!-- About Modal -->
-      <n-modal v-model:show="showAboutModal" preset="card" title="关于 Excel To CSV" style="width: 400px">
+      <n-modal v-model:show="showAboutModal" preset="card" title="关于" style="width: 400px">
         <n-space vertical align="center" style="text-align: center; padding: 20px 0;">
           <h2 style="margin: 0;">Excel To CSV</h2>
           <n-text depth="3">V1.0.1</n-text>
-          <n-text style="margin-top: 10px;">高性能的大批量 Excel 转 CSV 工具，专为极致的性能与内存安全设计。</n-text>
+          <n-text style="margin-top: 10px;">批量 Excel 转 CSV 工具</n-text>
           <n-button type="primary" style="margin-top: 20px;" @click="openGithub">
             <template #icon>
               <n-icon>
