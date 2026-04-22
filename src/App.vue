@@ -321,7 +321,8 @@ const currentPercent = computed(() => {
           <n-dynamic-tags v-model:value="sheetFilters" :disabled="isConverting" placeholder="例如: 汇总" />
         </n-space>
         <template #footer>
-          <n-space justify="end">
+          <n-space justify="space-between">
+            <n-button type="error" ghost @click="sheetFilters = []" :disabled="isConverting || sheetFilters.length === 0">清空全部</n-button>
             <n-button type="primary" @click="showFilterModal = false">完成</n-button>
           </n-space>
         </template>
@@ -370,7 +371,7 @@ body {
 }
 
 .bottom-card {
-  flex: 1 1 0; /* Important: this enables it to shrink and grow within remaining space */
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -381,7 +382,6 @@ body {
 .bottom-card > .n-card__content {
   display: flex;
   flex-direction: column;
-  flex: 1 1 0;
   overflow: hidden; /* Prevents card content from breaking the flex layout */
   padding-bottom: 12px;
 }
@@ -392,7 +392,7 @@ body {
 }
 
 .log-container {
-  flex: 1 1 0;
+  height: 120px;
   overflow-y: auto;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
