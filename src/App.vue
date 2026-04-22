@@ -247,13 +247,12 @@ const currentPercent = computed(() => {
       <!-- Header Bar -->
       <div style="flex: 0 0 auto; display: flex; justify-content: flex-end; align-items: center; padding: 0 4px; gap: 8px; font-size: 12px;">
         <!-- Theme Toggle -->
-        <n-button circle size="tiny" text @click="toggleTheme">
-          <template #icon>
-            <n-icon>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
-            </n-icon>
-          </template>
-        </n-button>
+        <div style="display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--n-text-color-2); padding: 2px 4px; border-radius: 4px;" @click="toggleTheme">
+          <n-icon :size="16">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8V20z"></path></svg>
+          </n-icon>
+          <span>{{ theme?.name === 'dark' ? t('theme.dark') : t('theme.light') }}</span>
+        </div>
 
         <!-- Language Selector -->
         <n-dropdown :options="languageOptions" @select="handleLocaleSelect" trigger="click" size="small">
@@ -378,31 +377,34 @@ const currentPercent = computed(() => {
       <n-card class="bottom-card" :title="t('status.title')" size="small">
         <div class="progress-section">
           <!-- Total Progress -->
-          <div style="margin-bottom: 12px;">
-            <n-space justify="space-between" style="margin-bottom: 4px;">
-              <n-text strong>{{ t('status.totalProgress') }}</n-text>
-              <n-text depth="3">{{ totalProgress.current }} / {{ totalProgress.total }} {{ t('status.files') }}</n-text>
-            </n-space>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <n-text strong style="white-space: nowrap; font-size: 12px;">{{ t('status.totalProgress') }}</n-text>
             <n-progress 
               type="line" 
               :percentage="totalPercent" 
               :status="isConverting ? 'info' : (totalProgress.total > 0 && totalProgress.current === totalProgress.total ? 'success' : 'default')"
-              processing
+              :processing="isConverting"
+              :show-indicator="totalProgress.total > 0"
+              style="flex: 1;"
             />
+            <n-text depth="3" style="white-space: nowrap; font-size: 12px; min-width: 70px; text-align: right;">{{ totalProgress.current }}/{{ totalProgress.total }} {{ t('status.files') }}</n-text>
           </div>
 
           <!-- Current File Progress -->
-          <div>
-            <n-space justify="space-between" style="margin-bottom: 4px;">
-              <n-text strong>{{ t('status.currentProcessing') }}<n-text type="primary">{{ currentFileProgress.filename || t('status.waiting') }}</n-text></n-text>
-              <n-text depth="3">{{ currentFileProgress.current }} / {{ currentFileProgress.total }} Sheet</n-text>
-            </n-space>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <n-text style="white-space: nowrap; font-size: 12px; max-width: 240px; overflow: hidden; text-overflow: ellipsis;">
+              <n-text strong style="font-size: 12px;">{{ t('status.currentProcessing') }}</n-text>
+              <n-text type="primary" style="font-size: 12px;">{{ currentFileProgress.filename || t('status.waiting') }}</n-text>
+            </n-text>
             <n-progress 
               type="line" 
               :percentage="currentPercent" 
               status="default"
-              indicator-placement="inside"
+              :processing="isConverting"
+              :show-indicator="currentFileProgress.total > 0"
+              style="flex: 1;"
             />
+            <n-text depth="3" style="white-space: nowrap; font-size: 12px; min-width: 70px; text-align: right;">{{ currentFileProgress.current }}/{{ currentFileProgress.total }} Sheet</n-text>
           </div>
         </div>
 
@@ -505,7 +507,7 @@ body {
 
 .progress-section {
   flex: 0 0 auto;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .log-container {

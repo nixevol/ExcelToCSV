@@ -1,5 +1,9 @@
 export default {
   languageLabel: 'English',
+  theme: {
+    dark: 'Dark',
+    light: 'Light'
+  },
   filter: {
     title: 'Exclusion Rules',
     modalTitle: 'Sheet Exclusion Rules',

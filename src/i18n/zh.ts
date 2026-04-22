@@ -1,5 +1,9 @@
 export default {
   languageLabel: '简体中文',
+  theme: {
+    dark: '深色',
+    light: '浅色'
+  },
   filter: {
     title: '设置排除关键字',
     modalTitle: 'Sheet 排除规则设置',
