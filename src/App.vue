@@ -196,56 +196,26 @@ const currentPercent = computed(() => {
           </n-button>
         </template>
         
-        <n-form label-placement="left" label-width="auto" size="small">
-          <n-grid :cols="24" x-gap="24" y-gap="8">
-            <!-- Naming & Encoding -->
-            <n-grid-item :span="12">
-              <n-form-item label="命名规则">
-                <n-select v-model:value="namingRule" :options="namingOptions" :disabled="isConverting" />
-              </n-form-item>
-            </n-grid-item>
-            <n-grid-item :span="12">
-              <n-form-item label="文本编码">
-                <n-select v-model:value="encoding" :options="encodingOptions" :disabled="isConverting" />
-              </n-form-item>
-            </n-grid-item>
+        <!-- File List Controls (Top) -->
+        <n-space style="margin-bottom: 8px;">
+          <n-button type="primary" @click="selectFiles" :disabled="isConverting">
+            导入 Excel 文件
+          </n-button>
+          <n-button @click="clearFiles" :disabled="isConverting || selectedFiles.length === 0">
+            清空列表
+          </n-button>
+          <n-button 
+            type="success" 
+            @click="startConversion" 
+            :loading="isConverting"
+            :disabled="selectedFiles.length === 0"
+          >
+            开始批量转换
+          </n-button>
+        </n-space>
 
-            <!-- Output Dir -->
-            <n-grid-item :span="24">
-              <n-form-item label="输出目录">
-                <n-space style="width: 100%" :wrap="false">
-                  <n-input v-model:value="outputDir" readonly placeholder="默认将转换后的 CSV 保存至原文件所在目录" />
-                  <n-button @click="selectOutputDir" :disabled="isConverting">选择目录</n-button>
-                </n-space>
-              </n-form-item>
-            </n-grid-item>
-
-            <!-- File List Controls -->
-            <n-grid-item :span="24">
-              <n-form-item label="文件列表">
-                <n-space>
-                  <n-button type="primary" @click="selectFiles" :disabled="isConverting">
-                    导入 Excel 文件
-                  </n-button>
-                  <n-button @click="clearFiles" :disabled="isConverting || selectedFiles.length === 0">
-                    清空列表
-                  </n-button>
-                  <n-button 
-                    type="success" 
-                    @click="startConversion" 
-                    :loading="isConverting"
-                    :disabled="selectedFiles.length === 0"
-                  >
-                    开始批量转换
-                  </n-button>
-                </n-space>
-              </n-form-item>
-            </n-grid-item>
-          </n-grid>
-        </n-form>
-
-        <!-- File Data Table -->
-        <div class="table-container">
+        <!-- File Data Table (Middle) -->
+        <div class="table-container" style="margin-bottom: 12px; margin-top: 0;">
           <n-data-table
             :columns="columns"
             :data="selectedFiles"
@@ -256,6 +226,22 @@ const currentPercent = computed(() => {
             striped
           />
         </div>
+
+        <!-- Configuration row (Bottom) -->
+        <n-form inline label-placement="left" size="small" :show-feedback="false" style="display: flex; flex-wrap: nowrap; gap: 16px; align-items: center;">
+          <n-form-item label="命名规则" style="margin: 0; flex-shrink: 0;">
+            <n-select v-model:value="namingRule" :options="namingOptions" :disabled="isConverting" style="width: 220px" />
+          </n-form-item>
+          <n-form-item label="文本编码" style="margin: 0; flex-shrink: 0;">
+            <n-select v-model:value="encoding" :options="encodingOptions" :disabled="isConverting" style="width: 100px" />
+          </n-form-item>
+          <n-form-item label="输出目录" style="margin: 0; flex: 1; min-width: 0;">
+            <div style="display: flex; gap: 8px; width: 100%;">
+              <n-input v-model:value="outputDir" readonly placeholder="默认保存至原目录" style="flex: 1;" />
+              <n-button @click="selectOutputDir" :disabled="isConverting">选择</n-button>
+            </div>
+          </n-form-item>
+        </n-form>
       </n-card>
 
       <!-- Bottom Section: Progress and Logs -->
