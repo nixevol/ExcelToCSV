@@ -9,21 +9,34 @@ on:
 jobs:
   publish-tauri:
     permissions:
-      contents: write # 必须要有写入权限才能创建 Release
+      contents: write
     strategy:
       fail-fast: false
       matrix:
         include:
+          # --- macOS ---
           - platform: "macos-latest"
-            target: "aarch64-apple-darwin" # 苹果 M 系列芯片
+            target: "aarch64-apple-darwin" # 苹果 M 系列芯片 (ARM)
           - platform: "macos-latest"
             target: "x86_64-apple-darwin" # 苹果 Intel 芯片
+
+          # --- Windows ---
+          - platform: "windows-latest"
+            target: "x86_64-pc-windows-msvc" # Windows 64位 (主流)
+          - platform: "windows-latest"
+            target: "i686-pc-windows-msvc" # Windows 32位 (老旧电脑)
+          - platform: "windows-latest"
+            target: "aarch64-pc-windows-msvc" # Windows ARM64 (Surface Pro X, 骁龙本等)
+
+          # --- Linux ---
+          # 默认打包会生成 AppImage 和 deb，AppImage 可以在 CentOS、Fedora、Arch 等大多数发行版上双击运行
           - platform: "ubuntu-22.04"
-            target: "x86_64-unknown-linux-gnu" # Linux x64
-          - platform: "windows-latest"
-            target: "x86_64-pc-windows-msvc" # Windows x64 (64位)
-          - platform: "windows-latest"
-            target: "i686-pc-windows-msvc" # Windows x86 (32位)
+            target: "x86_64-unknown-linux-gnu" # Linux x64 (主流桌面)
+          
+          # 注意：如果你的仓库是私有仓库且没有购买 GitHub 的 ARM 运行器时长，这一步可能会一直排队或失败。
+          # 公开仓库目前已经可以免费使用 ubuntu-24.04-arm 运行器。
+          - platform: "ubuntu-24.04-arm"
+            target: "aarch64-unknown-linux-gnu" # Linux ARM64 (树莓派、飞腾、鲲鹏等架构机型)
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -39,11 +52,11 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          # 安装当前矩阵对应的目标架构支持
           targets: ${{ matrix.target }}
 
       - name: Install dependencies (Ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
+        # 只要是 Ubuntu 系统，不管 x64 还是 arm64 都可以用 apt 安装依赖
+        if: startsWith(matrix.platform, 'ubuntu')
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
