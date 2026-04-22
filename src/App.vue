@@ -241,29 +241,39 @@ const currentPercent = computed(() => {
         </div>
 
         <!-- Configuration row (Bottom) -->
-        <n-form inline label-placement="left" size="small" :show-feedback="false" style="display: flex; flex-wrap: nowrap; gap: 16px; align-items: center;">
-          <n-form-item label="命名规则" style="margin: 0; flex-shrink: 0;">
-            <n-select v-model:value="namingRule" :options="namingOptions" :disabled="isConverting" style="width: 220px" />
-          </n-form-item>
-          <n-form-item label="文本编码" style="margin: 0; flex-shrink: 0;">
-            <n-select v-model:value="encoding" :options="encodingOptions" :disabled="isConverting" style="width: 100px" />
-          </n-form-item>
-          <n-form-item label="输出目录" style="margin: 0; flex: 1; min-width: 0;">
-            <div style="display: flex; gap: 8px; width: 100%;">
-              <n-input v-model:value="outputDir" readonly placeholder="默认保存至原目录" style="flex: 1;" />
-              <n-button @click="selectOutputDir" :disabled="isConverting">选择</n-button>
-            </div>
-          </n-form-item>
+        <div style="display: flex; gap: 16px; align-items: stretch; margin-top: 12px;">
+          <!-- Left side configs -->
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+            <n-form inline label-placement="left" size="small" :show-feedback="false" style="display: flex; gap: 16px;">
+              <n-form-item label="命名规则" style="margin: 0; flex-shrink: 0;">
+                <n-select v-model:value="namingRule" :options="namingOptions" :disabled="isConverting" style="width: 220px" />
+              </n-form-item>
+              <n-form-item label="文本编码" style="margin: 0; flex-shrink: 0;">
+                <n-select v-model:value="encoding" :options="encodingOptions" :disabled="isConverting" style="width: 100px" />
+              </n-form-item>
+            </n-form>
+            
+            <n-form inline label-placement="left" size="small" :show-feedback="false" style="display: flex;">
+              <n-form-item label="输出目录" style="margin: 0; flex: 1; min-width: 0;">
+                <div style="display: flex; gap: 8px; width: 100%;">
+                  <n-input v-model:value="outputDir" readonly placeholder="默认保存至原目录" style="flex: 1;" />
+                  <n-button @click="selectOutputDir" :disabled="isConverting">选择</n-button>
+                </div>
+              </n-form-item>
+            </n-form>
+          </div>
+
+          <!-- Right side Start Button -->
           <n-button 
             type="success" 
             @click="startConversion" 
             :loading="isConverting"
             :disabled="selectedFiles.length === 0"
-            style="flex-shrink: 0;"
+            style="flex-shrink: 0; height: auto;"
           >
             开始批量转换
           </n-button>
-        </n-form>
+        </div>
       </n-card>
 
       <!-- Bottom Section: Progress and Logs -->
