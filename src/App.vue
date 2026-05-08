@@ -550,7 +550,7 @@ body {
 
 .bottom-card {
   flex: 1 1 0;
-  min-height: 240px;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
@@ -559,7 +559,7 @@ body {
 }
 
 .bottom-card > .n-card__content {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -573,8 +573,8 @@ body {
 }
 
 .log-container {
-  flex: 1 1 auto;
-  min-height: 120px;
+  flex: 1 1 0;
+  min-height: 0;
   box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
