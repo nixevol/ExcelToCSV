@@ -8,7 +8,7 @@ import { getCurrentWebview } from "@tauri-apps/api/webview";
 import { useI18n } from "vue-i18n";
 import {
   NConfigProvider, NGlobalStyle, darkTheme,
-  NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NScrollbar, NInputNumber,
+  NCard, NButton, NSpace, NInput, NSelect, NDynamicTags, NInputNumber,
   NProgress, NText, useOsTheme,
   NForm, NFormItem,
   NDataTable, NModal, NIcon, NTooltip, NDropdown
@@ -76,12 +76,12 @@ watch(maxThreads, (v) => localStorage.setItem('app-max-threads', String(v)));
 const isConverting = ref(false);
 const isStopping = ref(false);
 const logs = ref<string>("");
-const scrollbarRef = ref<InstanceType<typeof NScrollbar> | null>(null);
+const logContainerRef = ref<HTMLElement | null>(null);
 
 watch(logs, () => {
   nextTick(() => {
-    if (scrollbarRef.value) {
-      scrollbarRef.value.scrollTo({ top: Number.MAX_SAFE_INTEGER, behavior: 'smooth' });
+    if (logContainerRef.value) {
+      logContainerRef.value.scrollTop = logContainerRef.value.scrollHeight;
     }
   });
 });
@@ -470,10 +470,8 @@ const currentPercent = computed(() => {
         </div>
 
         <!-- Logs -->
-        <div class="log-container">
-          <n-scrollbar ref="scrollbarRef">
-            <pre class="log-pre">{{ logs }}</pre>
-          </n-scrollbar>
+        <div ref="logContainerRef" class="log-container">
+          <pre class="log-pre">{{ logs }}</pre>
         </div>
       </n-card>
 
@@ -551,17 +549,22 @@ body {
 }
 
 .bottom-card {
-  flex: 0 0 auto;
+  flex: 1 1 0;
+  min-height: 240px;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow: hidden;
 }
 
 .bottom-card > .n-card__content {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   padding-bottom: 12px;
+  overflow: hidden;
 }
 
 .progress-section {
@@ -570,17 +573,34 @@ body {
 }
 
 .log-container {
+  flex: 1 1 auto;
   min-height: 120px;
-  max-height: 200px;
   box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
   background-color: var(--n-color-modal);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
-.log-container :deep(.n-scrollbar) {
-  max-height: 200px;
+.log-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.log-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.log-container::-webkit-scrollbar-thumb {
+  background-color: rgba(128, 128, 128, 0.42);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: 5px;
+}
+
+.log-container:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(128, 128, 128, 0.62);
 }
 
 .log-pre {
