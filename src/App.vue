@@ -443,7 +443,7 @@ const currentPercent = computed(() => {
               :percentage="totalPercent" 
               :status="totalProgress.total > 0 && totalProgress.current === totalProgress.total ? 'success' : 'default'"
               :processing="isConverting"
-              :show-indicator="totalProgress.total > 0"
+              :show-indicator="false"
             />
           </div>
 
@@ -464,7 +464,7 @@ const currentPercent = computed(() => {
               :percentage="currentPercent" 
               status="default"
               :processing="isConverting"
-              :show-indicator="currentFileProgress.total > 0"
+              :show-indicator="false"
             />
           </div>
         </div>
@@ -549,22 +549,17 @@ body {
 }
 
 .bottom-card {
-  flex: 1 1 0;
-  min-height: 0;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  overflow: hidden;
 }
 
 .bottom-card > .n-card__content {
-  flex: 1 1 0;
-  min-height: 0;
   display: flex;
   flex-direction: column;
   padding-bottom: 12px;
-  overflow: hidden;
 }
 
 .progress-section {
@@ -573,8 +568,7 @@ body {
 }
 
 .log-container {
-  flex: 1 1 0;
-  min-height: 0;
+  height: 160px;
   box-sizing: border-box;
   border: 1px solid var(--n-border-color);
   border-radius: 4px;
